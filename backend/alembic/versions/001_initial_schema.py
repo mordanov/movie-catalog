@@ -40,7 +40,7 @@ def upgrade() -> None:
         sa.Column("rating_external", sa.Float, nullable=True),
         sa.Column("added_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column("watched_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("watched_status", postgresql.ENUM(name="watched_status", create_type=False), nullable=False, server_default="not_watched"),
+        sa.Column("watched_status", postgresql.ENUM(name="watched_status", create_type=False), nullable=False, server_default="'not_watched'"),
         sa.Column("source", postgresql.ENUM(name="media_source", create_type=False), nullable=False),
         sa.Column("added_by", sa.String(255), nullable=True),
         sa.Column("notes", sa.Text, nullable=True),
