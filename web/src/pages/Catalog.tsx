@@ -97,6 +97,10 @@ export default function Catalog() {
             setItems((prev) => prev.map((m) => m.id === updated.id ? updated : m));
             setEditTarget(null);
           }}
+          onDeleted={() => {
+            setItems((prev) => prev.filter((m) => m.id !== editTarget.id));
+            setEditTarget(null);
+          }}
         />
       )}
     </div>

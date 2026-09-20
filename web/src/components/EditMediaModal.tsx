@@ -6,6 +6,7 @@ interface Props {
   media: Media;
   onClose: () => void;
   onSaved: (updated: Media) => void;
+  onDeleted: () => void;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -30,7 +31,7 @@ const STATUS_LABELS: Record<string, string> = {
   watched: "Просмотрено",
 };
 
-export default function EditMediaModal({ media, onClose, onSaved }: Props) {
+export default function EditMediaModal({ media, onClose, onSaved, onDeleted }: Props) {
   const [titleRu, setTitleRu] = useState(media.title_ru ?? "");
   const [category, setCategory] = useState<MediaCategory>(media.category);
   const [subtype, setSubtype] = useState<CartoonSubtype | null>(media.cartoon_subtype);
@@ -38,6 +39,20 @@ export default function EditMediaModal({ media, onClose, onSaved }: Props) {
   const [notes, setNotes] = useState(media.notes ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  async function handleDelete() {
+    const title = media.title_ru || media.title;
+    if (!window.confirm(`Удалить «${title}»?`)) return;
+    setLoading(true);
+    try {
+      await api.media.delete(media.id);
+      onDeleted();
+      onClose();
+    } catch (e) {
+      setError(`Ошибка удаления: ${e}`);
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -142,6 +157,14 @@ export default function EditMediaModal({ media, onClose, onSaved }: Props) {
           </div>
 
           <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={loading}
+              className="py-2 px-3 border border-red-300 text-red-600 rounded-md text-sm hover:bg-red-50 disabled:opacity-50"
+            >
+              Удалить
+            </button>
             <button
               type="button"
               onClick={onClose}
