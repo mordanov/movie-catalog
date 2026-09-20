@@ -192,16 +192,20 @@ async def test_cmd_watched_sets_status():
 
 @pytest.mark.asyncio
 async def test_cmd_unwatched_no_arg():
+    """Without a title arg, should operate on the most recently added item."""
     from bot.handlers.status import cmd_unwatched
 
+    item = {"id": "abc-123", "title": "Toy Story", "title_ru": None}
     message = MagicMock()
     message.text = "/unwatched"
     message.answer = AsyncMock()
 
-    await cmd_unwatched(message)
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=_mock_resp(200, {"items": [item]})), \
+         patch("httpx.AsyncClient.patch", new_callable=AsyncMock, return_value=_mock_resp(200, item)):
+        await cmd_unwatched(message)
 
     text = message.answer.call_args[0][0]
-    assert "Usage" in text
+    assert "Toy Story" in text
 
 
 # ---------------------------------------------------------------------------

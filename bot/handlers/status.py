@@ -10,19 +10,27 @@ _BACKEND = settings.backend_url
 _HEADERS = {"X-Bot-Secret": settings.bot_secret}
 
 
+_CMD_NAMES = {"watched": "watched", "watching": "watching", "not_watched": "unwatched"}
+
+
 async def _set_status(message: Message, status: str):
     args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer(f"Usage: /{status.replace('_', '')} <название>")
-        return
-    query = args[1].strip()
+    has_query = len(args) >= 2 and args[1].strip()
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{_BACKEND}/api/media",
-            params={"search": query, "page_size": 1},
-            headers=_HEADERS,
-        )
+        if has_query:
+            resp = await client.get(
+                f"{_BACKEND}/api/media",
+                params={"search": args[1].strip(), "page_size": 1},
+                headers=_HEADERS,
+            )
+        else:
+            # No arg — operate on the most recently added item
+            resp = await client.get(
+                f"{_BACKEND}/api/media",
+                params={"page": 1, "page_size": 1},
+                headers=_HEADERS,
+            )
 
     if resp.status_code != 200 or not resp.json().get("items"):
         await message.answer("Не найдено.")
