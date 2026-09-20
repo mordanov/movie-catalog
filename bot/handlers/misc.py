@@ -8,6 +8,7 @@ from bot.config import settings
 
 router = Router()
 _BACKEND = settings.backend_url
+_HEADERS = {"X-Bot-Secret": settings.bot_secret}
 
 
 @router.message(Command("start"))
@@ -50,7 +51,7 @@ async def cmd_help(message: Message):
 @router.message(Command("stats"))
 async def cmd_stats(message: Message):
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/stats")
+        resp = await client.get(f"{_BACKEND}/api/stats", headers=_HEADERS)
     if resp.status_code != 200:
         await message.answer("Ошибка получения статистики.")
         return
@@ -86,7 +87,7 @@ async def cmd_random(message: Message):
         params["category"] = args[1].strip()
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/media/random", params=params)
+        resp = await client.get(f"{_BACKEND}/api/media/random", params=params, headers=_HEADERS)
 
     if resp.status_code == 404:
         await message.answer("Ничего не найдено в каталоге.")

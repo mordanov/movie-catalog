@@ -48,6 +48,7 @@ services:
       WEB_USER_2_PASSWORD_HASH: ${WEB_USER_2_PASSWORD_HASH:-}
       JWT_SECRET: ${JWT_SECRET:?required}
       JWT_EXPIRE_HOURS: ${JWT_EXPIRE_HOURS:-72}
+      BOT_SECRET: ${BOT_SECRET:?required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,6 +62,7 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?required}
       INITIAL_ADMIN_TELEGRAM_ID: ${INITIAL_ADMIN_TELEGRAM_ID:?required}
       BACKEND_URL: http://backend:8000
+      BOT_SECRET: ${BOT_SECRET:?required}
     depends_on:
       - backend
 

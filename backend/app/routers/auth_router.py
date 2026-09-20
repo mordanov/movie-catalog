@@ -21,6 +21,7 @@ async def login(body: LoginRequest, response: Response):
         key="access_token",
         value=token,
         httponly=True,
+        secure=True,
         samesite="lax",
         max_age=60 * 60 * 72,
     )

@@ -4,6 +4,11 @@
         reverse_proxy backend:8000
     }
 
+    # Poster images served from MinIO (bucket is public-read)
+    handle /posters/* {
+        reverse_proxy minio:9000
+    }
+
     # Everything else served by the React SPA container
     handle {
         reverse_proxy web:80
