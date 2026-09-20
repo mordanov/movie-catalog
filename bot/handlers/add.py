@@ -14,6 +14,7 @@ from bot.states import AddMedia
 
 router = Router()
 _BACKEND = settings.backend_url
+_HEADERS = {"X-Bot-Secret": settings.bot_secret}
 
 CATEGORY_LABELS = {
     "cartoon": "Мультфильм",
@@ -78,10 +79,11 @@ async def _resolve_and_show(message: Message, state: FSMContext, query: str = No
             resp = await client.post(
                 f"{_BACKEND}/api/resolve/screenshot",
                 files={"file": ("screenshot.jpg", image_bytes, "image/jpeg")},
+                headers=_HEADERS,
                 timeout=30,
             )
         else:
-            resp = await client.post(f"{_BACKEND}/api/resolve", json={"query": query}, timeout=15)
+            resp = await client.post(f"{_BACKEND}/api/resolve", json={"query": query}, headers=_HEADERS, timeout=15)
 
     if resp.status_code != 200:
         await message.answer(f"Ошибка поиска: {resp.status_code}")
@@ -254,6 +256,7 @@ async def _do_confirm(message, state: FSMContext, candidate: dict, category: str
                 "cartoon_subtype": cartoon_subtype,
                 "source": "telegram_text",
             },
+            headers=_HEADERS,
             timeout=30,
         )
 
