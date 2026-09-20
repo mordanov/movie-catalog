@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers.auth_router import router as auth_router
+from app.routers.bot_router import router as bot_router
 from app.routers.media_router import router as media_router, stats_router
 from app.routers.resolve_router import router as resolve_router
 
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(bot_router)
 app.include_router(media_router)
 app.include_router(stats_router)
 app.include_router(resolve_router)
