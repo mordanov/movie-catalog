@@ -1,8 +1,14 @@
+import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 export default function Layout() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    api.auth.me().then((u) => setUsername(u.login)).catch(() => {});
+  }, []);
 
   async function handleLogout() {
     await api.auth.logout().catch(() => {});
@@ -17,12 +23,15 @@ export default function Layout() {
           <Link to="/" className="text-sm text-gray-700 hover:text-indigo-600">Каталог</Link>
           <Link to="/stats" className="text-sm text-gray-700 hover:text-indigo-600">Статистика</Link>
         </div>
-        <button
-          onClick={handleLogout}
-          className="text-sm text-gray-500 hover:text-red-600"
-        >
-          Выйти
-        </button>
+        <div className="flex items-center gap-3">
+          {username && <span className="text-sm text-gray-500">{username}</span>}
+          <button
+            onClick={handleLogout}
+            className="text-sm text-gray-500 hover:text-red-600"
+          >
+            Выйти
+          </button>
+        </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Outlet />

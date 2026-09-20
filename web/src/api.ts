@@ -51,7 +51,7 @@ export const api = {
       return request<MediaListResponse>(`/media${qs ? `?${qs}` : ""}`);
     },
     get: (id: string) => request<Media>(`/media/${id}`),
-    patch: (id: string, data: MediaUpdate) =>
+    update: (id: string, data: MediaUpdate) =>
       request<Media>(`/media/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: string) => request<void>(`/media/${id}`, { method: "DELETE" }),
     random: (params: { category?: string; type?: string } = {}) => {
@@ -59,19 +59,6 @@ export const api = {
         Object.fromEntries(Object.entries(params).filter(([, v]) => v))
       ).toString();
       return request<Media>(`/media/random${qs ? `?${qs}` : ""}`);
-    },
-    stats: () => request<StatsResponse>("/stats"),
-  },
-
-  resolve: {
-    byText: (query: string) =>
-      request<Candidate[]>("/resolve", { method: "POST", body: JSON.stringify({ query }) }),
-    byScreenshot: (file: File) => {
-      const fd = new FormData();
-      fd.append("file", file);
-      return fetch(`${BASE}/resolve/screenshot`, { method: "POST", credentials: "include", body: fd }).then(
-        (r) => (r.ok ? r.json() as Promise<Candidate[]> : Promise.reject(new Error(`${r.status}`)))
-      );
     },
     confirm: (data: {
       tmdb_id: number;
@@ -81,5 +68,22 @@ export const api = {
       source: MediaSource;
       notes?: string;
     }) => request<Media>("/media/confirm", { method: "POST", body: JSON.stringify(data) }),
+  },
+
+  resolve: {
+    search: (query: string) =>
+      request<Candidate[]>("/resolve", { method: "POST", body: JSON.stringify({ query }) }),
+    byScreenshot: async (file: File) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      const r = await fetch(`${BASE}/resolve/screenshot`, { method: "POST", credentials: "include", body: fd });
+      if (r.status === 401) { window.location.href = "/login"; throw new Error("Unauthorized"); }
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json() as Promise<Candidate[]>;
+    },
+  },
+
+  stats: {
+    get: () => request<StatsResponse>("/stats"),
   },
 };
