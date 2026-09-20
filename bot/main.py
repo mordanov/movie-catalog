@@ -38,8 +38,10 @@ async def main() -> None:
     dp.include_router(misc.router)
     dp.include_router(users.router)
 
-    # Import add/list/manage/status routers in later tasks
-    # dp.include_router(add.router)
+    from bot.handlers import add as add_handler
+    dp.include_router(add_handler.router)
+
+    # Import list/manage/status routers in later tasks
     # dp.include_router(list_.router)
     # dp.include_router(manage.router)
     # dp.include_router(status.router)
