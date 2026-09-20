@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Cookie, HTTPException, status
+from fastapi import Cookie, Header, HTTPException, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -39,8 +39,14 @@ def create_access_token(login: str) -> str:
     return jwt.encode({"sub": login, "exp": expire}, s.jwt_secret, algorithm="HS256")
 
 
-def get_current_user(access_token: str | None = Cookie(default=None)) -> str:
+def get_current_user(
+    access_token: str | None = Cookie(default=None),
+    x_bot_secret: str | None = Header(default=None),
+) -> str:
     s = get_settings()
+    # Bot internal access via shared secret
+    if x_bot_secret and s.bot_secret and x_bot_secret == s.bot_secret:
+        return "bot"
     if not access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     try:

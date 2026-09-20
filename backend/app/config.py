@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     jwt_secret: str = "change-me"
     jwt_expire_hours: int = 72
 
+    bot_secret: str = ""  # shared secret for bot→backend calls; set in .env
+
 
 @lru_cache
 def get_settings() -> Settings:

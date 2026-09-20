@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     telegram_bot_token: str
     initial_admin_telegram_id: int
     backend_url: str = "http://backend:8000"
+    bot_secret: str = ""  # must match backend BOT_SECRET
 
 
 settings = Settings()

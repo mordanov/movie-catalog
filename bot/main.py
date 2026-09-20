@@ -41,10 +41,10 @@ async def main() -> None:
     from bot.handlers import add as add_handler
     dp.include_router(add_handler.router)
 
-    # Import list/manage/status routers in later tasks
-    # dp.include_router(list_.router)
-    # dp.include_router(manage.router)
-    # dp.include_router(status.router)
+    from bot.handlers import list_ as list_handler, manage as manage_handler, status as status_handler
+    dp.include_router(list_handler.router)
+    dp.include_router(manage_handler.router)
+    dp.include_router(status_handler.router)
 
     await bootstrap_admin(settings.backend_url, settings.initial_admin_telegram_id)
     logging.info("Bot starting...")
