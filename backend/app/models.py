@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    BigInteger, DateTime, Enum, Float, Integer, String, Text, func,
+    BigInteger, DateTime, Enum, Float, Integer, String, Text, func, text,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -71,7 +71,7 @@ class Media(Base):
         Enum(WatchedStatus, name="watched_status"),
         nullable=False,
         default=WatchedStatus.not_watched,
-        server_default="'not_watched'",
+        server_default=text("'not_watched'"),
     )
     source: Mapped[MediaSource] = mapped_column(Enum(MediaSource, name="media_source"), nullable=False)
     added_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
