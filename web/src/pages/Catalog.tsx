@@ -5,6 +5,7 @@ import MediaCard from "../components/MediaCard";
 import FilterBar from "../components/FilterBar";
 import Pagination from "../components/Pagination";
 import AddMediaModal from "../components/AddMediaModal";
+import EditMediaModal from "../components/EditMediaModal";
 
 interface Filters {
   category: string;
@@ -88,14 +89,15 @@ export default function Catalog() {
         />
       )}
 
-      {/* EditMediaModal wired up in Task 12 */}
       {editTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded p-4">
-            <p>Edit modal — Task 12</p>
-            <button onClick={() => setEditTarget(null)}>Закрыть</button>
-          </div>
-        </div>
+        <EditMediaModal
+          media={editTarget}
+          onClose={() => setEditTarget(null)}
+          onSaved={(updated) => {
+            setItems((prev) => prev.map((m) => m.id === updated.id ? updated : m));
+            setEditTarget(null);
+          }}
+        />
       )}
     </div>
   );
