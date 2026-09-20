@@ -48,7 +48,7 @@ def _category_keyboard() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text=label, callback_data=f"category:{key}")]
         for key, label in CATEGORY_LABELS.items()
     ]
-    buttons.append([InlineKeyboardButton(text="Отмена", callback_data="candidate:cancel")])
+    buttons.append([InlineKeyboardButton(text="Отмена", callback_data="confirm:no")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
@@ -108,7 +108,7 @@ async def _resolve_and_show(message: Message, state: FSMContext, query: str = No
     else:
         dq = candidates[0].get("disambiguation_question") or "Какой из вариантов вы имели в виду?"
         text = f"{dq}\n"
-        await message.answer(text, reply_markup=_candidate_keyboard(candidates), parse_mode="HTML")
+        await message.answer(text, reply_markup=_candidate_keyboard(candidates[:5]), parse_mode="HTML")
 
 
 # /add command
