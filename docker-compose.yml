@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: moviecatalog
+      POSTGRES_USER: ${POSTGRES_USER:-catalog}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-catalog}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?required}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-catalog}:${POSTGRES_PASSWORD}@postgres:5432/moviecatalog
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?required}
+      TMDB_API_KEY: ${TMDB_API_KEY:?required}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-posters}
+      WEB_USER_1_LOGIN: ${WEB_USER_1_LOGIN:?required}
+      WEB_USER_1_PASSWORD_HASH: ${WEB_USER_1_PASSWORD_HASH:?required}
+      WEB_USER_2_LOGIN: ${WEB_USER_2_LOGIN:-}
+      WEB_USER_2_PASSWORD_HASH: ${WEB_USER_2_PASSWORD_HASH:-}
+      JWT_SECRET: ${JWT_SECRET:?required}
+      JWT_EXPIRE_HOURS: ${JWT_EXPIRE_HOURS:-72}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  bot:
+    build: ./bot
+    restart: unless-stopped
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?required}
+      INITIAL_ADMIN_TELEGRAM_ID: ${INITIAL_ADMIN_TELEGRAM_ID:?required}
+      BACKEND_URL: http://backend:8000
+    depends_on:
+      - backend
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - web
+    environment:
+      DOMAIN: ${DOMAIN:?required}
+
+volumes:
+  pg_data:
+  minio_data:
+  caddy_data:
+  caddy_config:

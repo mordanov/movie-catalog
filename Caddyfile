@@ -1,0 +1,16 @@
+{$DOMAIN} {
+    # API proxied to backend
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # Everything else served by the React SPA container
+    handle {
+        reverse_proxy web:80
+    }
+
+    encode gzip
+    log {
+        output stdout
+    }
+}
