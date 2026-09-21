@@ -4,6 +4,7 @@ import logging
 import httpx
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import BotCommand, BotCommandScopeChat, BotCommandScopeDefault
 
 from bot.config import settings
 from bot.handlers import misc, users
@@ -53,6 +54,33 @@ async def main() -> None:
     dp.include_router(status_handler.router)
 
     await bootstrap_admin(settings.backend_url, settings.initial_admin_telegram_id)
+
+    user_commands = [
+        BotCommand(command="add", description="Добавить фильм / мультфильм / сериал"),
+        BotCommand(command="list", description="Список каталога"),
+        BotCommand(command="find", description="Найти по названию"),
+        BotCommand(command="watched", description="Отметить просмотренным"),
+        BotCommand(command="watching", description="Отметить «смотрю»"),
+        BotCommand(command="unwatched", description="Убрать отметку просмотра"),
+        BotCommand(command="delete", description="Удалить запись"),
+        BotCommand(command="edit", description="Редактировать запись"),
+        BotCommand(command="random", description="Случайная запись"),
+        BotCommand(command="stats", description="Статистика каталога"),
+        BotCommand(command="help", description="Справка"),
+        BotCommand(command="cancel", description="Отменить текущее действие"),
+    ]
+    admin_commands = user_commands + [
+        BotCommand(command="adduser", description="Добавить пользователя"),
+        BotCommand(command="removeuser", description="Удалить пользователя"),
+        BotCommand(command="users", description="Список пользователей"),
+    ]
+
+    await bot.set_my_commands(user_commands, scope=BotCommandScopeDefault())
+    await bot.set_my_commands(
+        admin_commands,
+        scope=BotCommandScopeChat(chat_id=settings.initial_admin_telegram_id),
+    )
+
     logging.info("Bot starting...")
     await dp.start_polling(bot)
 
