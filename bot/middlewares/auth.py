@@ -8,8 +8,9 @@ from cachetools import TTLCache
 
 class WhitelistMiddleware(BaseMiddleware):
     # ponytail: in-memory TTLCache, single instance per process; fine for one-bot one-process deployment
-    def __init__(self, backend_url: str, ttl: int = 60):
+    def __init__(self, backend_url: str, bot_secret: str, ttl: int = 60):
         self._backend_url = backend_url
+        self._bot_secret = bot_secret
         self._cache: TTLCache = TTLCache(maxsize=10_000, ttl=ttl)
 
     async def __call__(
@@ -29,7 +30,9 @@ class WhitelistMiddleware(BaseMiddleware):
             try:
                 async with httpx.AsyncClient() as client:
                     resp = await client.get(
-                        f"{self._backend_url}/api/bot/users/{tid}", timeout=5
+                        f"{self._backend_url}/api/bot/users/{tid}",
+                        headers={"X-Bot-Secret": self._bot_secret},
+                        timeout=5,
                     )
                 allowed = resp.status_code == 200
             except Exception:
@@ -38,7 +41,7 @@ class WhitelistMiddleware(BaseMiddleware):
 
         if not allowed:
             if isinstance(event, Message):
-                await event.answer("У вас нет доступа к этому боту.")
+                await event.answer(f"У вас нет доступа к этому боту. (Ваш id: {tid})")
             return
 
         return await handler(event, data)
