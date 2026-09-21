@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     jwt_expire_hours: int = 72
 
     bot_secret: str = ""  # shared secret for bot→backend calls; set in .env
+    cookie_secure: bool = True  # set False for local HTTP dev
 
 
 @lru_cache

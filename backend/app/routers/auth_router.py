@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 
 from app.auth import authenticate_user, create_access_token, get_current_user
+from app.config import get_settings
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -23,7 +24,7 @@ async def login(body: LoginRequest, response: Response):
         key="access_token",
         value=token,
         httponly=True,
-        secure=True,
+        secure=get_settings().cookie_secure,
         samesite="lax",
         max_age=60 * 60 * 72,
     )
