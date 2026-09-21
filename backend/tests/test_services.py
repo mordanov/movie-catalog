@@ -1,6 +1,7 @@
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 # ---- TMDB ----
@@ -64,6 +65,63 @@ async def test_tmdb_get_details_movie():
 
     assert detail["title"] == "Toy Story"
     assert "Tom Hanks" in detail["actors"]
+
+
+@pytest.mark.asyncio
+async def test_tmdb_get_details_returns_trailer_url():
+    fake_detail = {
+        "id": 862,
+        "title": "Toy Story",
+        "release_date": "1995-11-22",
+        "overview": "A cowboy doll...",
+        "poster_path": "/toy.jpg",
+        "vote_average": 8.0,
+        "genres": [{"id": 16, "name": "Animation"}],
+        "credits": {"cast": [{"name": f"Actor {i}", "order": i} for i in range(10)]},
+        "videos": {
+            "results": [
+                {"type": "Teaser", "site": "YouTube", "key": "WRONG"},
+                {"type": "Trailer", "site": "YouTube", "key": "abc123"},
+                {"type": "Trailer", "site": "Vimeo", "key": "WRONG_VIMEO"},
+            ]
+        },
+        "origin_country": ["US"],
+    }
+    fake_response = MagicMock()
+    fake_response.json.return_value = fake_detail
+    fake_response.raise_for_status = MagicMock()
+
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response):
+        from app.services.tmdb import get_details
+        detail = await get_details(862, "movie", language="en-US")
+
+    assert detail["trailer_url"] == "https://www.youtube.com/watch?v=abc123"
+    assert len(detail["actors"]) == 5  # capped at 5
+
+
+@pytest.mark.asyncio
+async def test_tmdb_get_details_no_trailer_returns_none():
+    fake_detail = {
+        "id": 862,
+        "title": "Toy Story",
+        "release_date": "1995-11-22",
+        "overview": "A cowboy doll...",
+        "poster_path": "/toy.jpg",
+        "vote_average": 8.0,
+        "genres": [],
+        "credits": {"cast": []},
+        "videos": {"results": []},
+        "origin_country": ["US"],
+    }
+    fake_response = MagicMock()
+    fake_response.json.return_value = fake_detail
+    fake_response.raise_for_status = MagicMock()
+
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response):
+        from app.services.tmdb import get_details
+        detail = await get_details(862, "movie")
+
+    assert detail["trailer_url"] is None
 
 
 # ---- OpenAI ----

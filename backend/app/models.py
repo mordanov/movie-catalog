@@ -102,6 +102,7 @@ class Media(Base):
     )
     added_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    trailer_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
 
 
 class BotUser(Base):
