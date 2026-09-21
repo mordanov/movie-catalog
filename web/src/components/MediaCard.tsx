@@ -25,7 +25,7 @@ export default function MediaCard({ media, onEdit }: Props) {
   const catLabel = CATEGORY_LABELS[media.category] ?? media.category;
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden flex flex-col">
+    <div className="bg-surface rounded-lg shadow overflow-hidden flex flex-col">
       {media.poster_url ? (
         <img
           src={media.poster_url}
@@ -34,13 +34,13 @@ export default function MediaCard({ media, onEdit }: Props) {
           loading="lazy"
         />
       ) : (
-        <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400 text-4xl">
+        <div className="w-full h-48 bg-border-theme flex items-center justify-center text-muted text-4xl">
           🎬
         </div>
       )}
       <div className="p-3 flex flex-col gap-1 flex-1">
-        <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2">{title}</h3>
-        <p className="text-xs text-gray-400">{media.year ?? "—"}</p>
+        <h3 className="font-semibold text-text-base text-sm leading-tight line-clamp-2">{title}</h3>
+        <p className="text-xs text-muted">{media.year ?? "—"}</p>
         <div className="flex flex-wrap gap-1 mt-auto pt-2">
           <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">{catLabel}</span>
           <span className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}>
@@ -50,7 +50,7 @@ export default function MediaCard({ media, onEdit }: Props) {
         {onEdit && (
           <button
             onClick={() => onEdit(media)}
-            className="mt-2 text-xs text-indigo-600 hover:text-indigo-800 text-left"
+            className="mt-2 text-xs text-primary hover:text-primary-hover text-left"
           >
             Редактировать
           </button>

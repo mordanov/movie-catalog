@@ -58,7 +58,7 @@ export default function Catalog() {
         <FilterBar filters={filters} onChange={handleFilterChange} />
         <button
           onClick={() => setShowAdd(true)}
-          className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
+          className="px-4 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary-hover"
         >
           + Добавить
         </button>
@@ -69,9 +69,9 @@ export default function Catalog() {
       )}
 
       {loading ? (
-        <div className="text-center text-gray-400 py-12">Загрузка...</div>
+        <div className="text-center text-muted py-12">Загрузка...</div>
       ) : items.length === 0 ? (
-        <div className="text-center text-gray-400 py-12">Ничего не найдено</div>
+        <div className="text-center text-muted py-12">Ничего не найдено</div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {items.map((m) => (

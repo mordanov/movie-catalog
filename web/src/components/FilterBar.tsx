@@ -45,26 +45,26 @@ export default function FilterBar({ filters, onChange }: Props) {
         placeholder="Поиск..."
         value={filters.search}
         onChange={(e) => set("search", e.target.value)}
-        className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500 w-48"
+        className="border border-border-theme rounded-md px-3 py-1.5 text-sm focus:ring-primary focus:border-primary w-48"
       />
       <select
         value={filters.category}
         onChange={(e) => set("category", e.target.value)}
-        className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+        className="border border-border-theme rounded-md px-3 py-1.5 text-sm focus:ring-primary focus:border-primary"
       >
         {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
       </select>
       <select
         value={filters.type}
         onChange={(e) => set("type", e.target.value)}
-        className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+        className="border border-border-theme rounded-md px-3 py-1.5 text-sm focus:ring-primary focus:border-primary"
       >
         {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
       </select>
       <select
         value={filters.watched_status}
         onChange={(e) => set("watched_status", e.target.value)}
-        className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+        className="border border-border-theme rounded-md px-3 py-1.5 text-sm focus:ring-primary focus:border-primary"
       >
         {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
       </select>

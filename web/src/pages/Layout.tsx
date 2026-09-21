@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { api } from "../api";
+import ThemePicker from "../components/ThemePicker";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -16,19 +17,17 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-page text-text-base">
+      <nav className="bg-nav border-b border-border-theme px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <span className="font-bold text-indigo-600 text-lg">Каталог</span>
-          <Link to="/" className="text-sm text-gray-700 hover:text-indigo-600">Каталог</Link>
-          <Link to="/stats" className="text-sm text-gray-700 hover:text-indigo-600">Статистика</Link>
+          <span className="font-bold text-primary text-lg">Каталог</span>
+          <Link to="/" className="text-sm text-text-base hover:text-primary">Каталог</Link>
+          <Link to="/stats" className="text-sm text-text-base hover:text-primary">Статистика</Link>
         </div>
-        <div className="flex items-center gap-3">
-          {username && <span className="text-sm text-gray-500">{username}</span>}
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-red-600"
-          >
+        <div className="flex items-center gap-4">
+          <ThemePicker />
+          {username && <span className="text-sm text-muted">{username}</span>}
+          <button onClick={handleLogout} className="text-sm text-muted hover:text-primary">
             Выйти
           </button>
         </div>

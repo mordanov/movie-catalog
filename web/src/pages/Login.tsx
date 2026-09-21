@@ -24,9 +24,9 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-sm w-full space-y-6 p-8 bg-white rounded-xl shadow">
-        <h1 className="text-2xl font-bold text-center text-gray-900">Каталог фильмов</h1>
+    <div className="min-h-screen flex items-center justify-center bg-page">
+      <div className="max-w-sm w-full space-y-6 p-8 bg-surface rounded-xl shadow">
+        <h1 className="text-2xl font-bold text-center text-text-base">Каталог фильмов</h1>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded text-sm">
             {error}
@@ -34,29 +34,29 @@ export default function Login() {
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Логин</label>
+            <label className="block text-sm font-medium text-muted">Логин</label>
             <input
               type="text"
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full rounded-md border-border-theme shadow-sm focus:ring-primary focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Пароль</label>
+            <label className="block text-sm font-medium text-muted">Пароль</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full rounded-md border-border-theme shadow-sm focus:ring-primary focus:border-primary"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50"
+            className="w-full py-2 px-4 bg-primary text-white font-medium rounded-md hover:bg-primary-hover disabled:opacity-50"
           >
             {loading ? "Вход..." : "Войти"}
           </button>
