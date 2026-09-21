@@ -76,7 +76,7 @@ def upgrade() -> None:
             "watched_status",
             postgresql.ENUM(name="watched_status", create_type=False),
             nullable=False,
-            server_default="'not_watched'",
+            server_default=sa.text("'not_watched'"),
         ),
         sa.Column(
             "source",
