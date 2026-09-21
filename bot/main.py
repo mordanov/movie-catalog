@@ -35,8 +35,16 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
 
     # Whitelist middleware on all message and callback events
-    dp.message.middleware(WhitelistMiddleware(backend_url=settings.backend_url, bot_secret=settings.bot_secret))
-    dp.callback_query.middleware(WhitelistMiddleware(backend_url=settings.backend_url, bot_secret=settings.bot_secret))
+    dp.message.middleware(
+        WhitelistMiddleware(
+            backend_url=settings.backend_url, bot_secret=settings.bot_secret
+        )
+    )
+    dp.callback_query.middleware(
+        WhitelistMiddleware(
+            backend_url=settings.backend_url, bot_secret=settings.bot_secret
+        )
+    )
 
     dp.include_router(misc.router)
     dp.include_router(users.router)

@@ -332,7 +332,14 @@ git commit -m "Task 1: project scaffolding — docker-compose, Dockerfiles, .env
 
 ```python
 """Tests that all enum values match the spec."""
-from app.models import MediaType, MediaCategory, CartoonSubtype, WatchedStatus, MediaSource
+
+from app.models import (
+    MediaType,
+    MediaCategory,
+    CartoonSubtype,
+    WatchedStatus,
+    MediaSource,
+)
 
 
 def test_media_type_values():
@@ -341,25 +348,33 @@ def test_media_type_values():
 
 def test_media_category_values():
     assert {e.value for e in MediaCategory} == {
-        "kids_series", "adult_series", "family_movie", "adult_movie", "cartoon"
+        "kids_series",
+        "adult_series",
+        "family_movie",
+        "adult_movie",
+        "cartoon",
     }
 
 
 def test_cartoon_subtype_values():
     assert {e.value for e in CartoonSubtype} == {
-        "disney", "pixar", "soviet", "russian", "other"
+        "disney",
+        "pixar",
+        "soviet",
+        "russian",
+        "other",
     }
 
 
 def test_watched_status_values():
-    assert {e.value for e in WatchedStatus} == {
-        "not_watched", "watching", "watched"
-    }
+    assert {e.value for e in WatchedStatus} == {"not_watched", "watching", "watched"}
 
 
 def test_media_source_values():
     assert {e.value for e in MediaSource} == {
-        "telegram_text", "telegram_screenshot", "web_ui"
+        "telegram_text",
+        "telegram_screenshot",
+        "web_ui",
     }
 ```
 
@@ -371,7 +386,14 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    BigInteger, DateTime, Enum, Float, Integer, String, Text, func,
+    BigInteger,
+    DateTime,
+    Enum,
+    Float,
+    Integer,
+    String,
+    Text,
+    func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -418,30 +440,48 @@ class MediaSource(str, enum.Enum):
 class Media(Base):
     __tablename__ = "media"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     title_ru: Mapped[str | None] = mapped_column(String(500), nullable=True)
     year: Mapped[int | None] = mapped_column(Integer, nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     poster_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
-    type: Mapped[MediaType] = mapped_column(Enum(MediaType, name="media_type"), nullable=False)
-    category: Mapped[MediaCategory] = mapped_column(Enum(MediaCategory, name="media_category"), nullable=False)
+    type: Mapped[MediaType] = mapped_column(
+        Enum(MediaType, name="media_type"), nullable=False
+    )
+    category: Mapped[MediaCategory] = mapped_column(
+        Enum(MediaCategory, name="media_category"), nullable=False
+    )
     cartoon_subtype: Mapped[CartoonSubtype | None] = mapped_column(
         Enum(CartoonSubtype, name="cartoon_subtype"), nullable=True
     )
-    genres: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, server_default="{}")
-    actors: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, server_default="{}")
-    external_ids: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="{}")
+    genres: Mapped[list[str]] = mapped_column(
+        ARRAY(String), nullable=False, server_default="{}"
+    )
+    actors: Mapped[list[str]] = mapped_column(
+        ARRAY(String), nullable=False, server_default="{}"
+    )
+    external_ids: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, server_default="{}"
+    )
     rating_external: Mapped[float | None] = mapped_column(Float, nullable=True)
-    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    watched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    watched_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     watched_status: Mapped[WatchedStatus] = mapped_column(
         Enum(WatchedStatus, name="watched_status"),
         nullable=False,
         default=WatchedStatus.not_watched,
         server_default="not_watched",
     )
-    source: Mapped[MediaSource] = mapped_column(Enum(MediaSource, name="media_source"), nullable=False)
+    source: Mapped[MediaSource] = mapped_column(
+        Enum(MediaSource, name="media_source"), nullable=False
+    )
     added_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -452,7 +492,9 @@ class BotUser(Base):
     telegram_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     added_by_telegram_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
-    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 ```
 
 - [ ] **Step 3: Write `backend/app/database.py`**
@@ -542,6 +584,7 @@ Revision ID: 001initial
 Revises:
 Create Date: 2026-09-20
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -556,10 +599,18 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.execute("CREATE TYPE media_type AS ENUM ('movie', 'cartoon', 'series')")
-    op.execute("CREATE TYPE media_category AS ENUM ('kids_series', 'adult_series', 'family_movie', 'adult_movie', 'cartoon')")
-    op.execute("CREATE TYPE cartoon_subtype AS ENUM ('disney', 'pixar', 'soviet', 'russian', 'other')")
-    op.execute("CREATE TYPE watched_status AS ENUM ('not_watched', 'watching', 'watched')")
-    op.execute("CREATE TYPE media_source AS ENUM ('telegram_text', 'telegram_screenshot', 'web_ui')")
+    op.execute(
+        "CREATE TYPE media_category AS ENUM ('kids_series', 'adult_series', 'family_movie', 'adult_movie', 'cartoon')"
+    )
+    op.execute(
+        "CREATE TYPE cartoon_subtype AS ENUM ('disney', 'pixar', 'soviet', 'russian', 'other')"
+    )
+    op.execute(
+        "CREATE TYPE watched_status AS ENUM ('not_watched', 'watching', 'watched')"
+    )
+    op.execute(
+        "CREATE TYPE media_source AS ENUM ('telegram_text', 'telegram_screenshot', 'web_ui')"
+    )
 
     op.create_table(
         "media",
@@ -569,17 +620,49 @@ def upgrade() -> None:
         sa.Column("year", sa.Integer, nullable=True),
         sa.Column("description", sa.Text, nullable=True),
         sa.Column("poster_url", sa.String(2048), nullable=True),
-        sa.Column("type", postgresql.ENUM(name="media_type", create_type=False), nullable=False),
-        sa.Column("category", postgresql.ENUM(name="media_category", create_type=False), nullable=False),
-        sa.Column("cartoon_subtype", postgresql.ENUM(name="cartoon_subtype", create_type=False), nullable=True),
-        sa.Column("genres", postgresql.ARRAY(sa.String), nullable=False, server_default="{}"),
-        sa.Column("actors", postgresql.ARRAY(sa.String), nullable=False, server_default="{}"),
-        sa.Column("external_ids", postgresql.JSONB, nullable=False, server_default="{}"),
+        sa.Column(
+            "type",
+            postgresql.ENUM(name="media_type", create_type=False),
+            nullable=False,
+        ),
+        sa.Column(
+            "category",
+            postgresql.ENUM(name="media_category", create_type=False),
+            nullable=False,
+        ),
+        sa.Column(
+            "cartoon_subtype",
+            postgresql.ENUM(name="cartoon_subtype", create_type=False),
+            nullable=True,
+        ),
+        sa.Column(
+            "genres", postgresql.ARRAY(sa.String), nullable=False, server_default="{}"
+        ),
+        sa.Column(
+            "actors", postgresql.ARRAY(sa.String), nullable=False, server_default="{}"
+        ),
+        sa.Column(
+            "external_ids", postgresql.JSONB, nullable=False, server_default="{}"
+        ),
         sa.Column("rating_external", sa.Float, nullable=True),
-        sa.Column("added_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "added_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
         sa.Column("watched_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("watched_status", postgresql.ENUM(name="watched_status", create_type=False), nullable=False, server_default="not_watched"),
-        sa.Column("source", postgresql.ENUM(name="media_source", create_type=False), nullable=False),
+        sa.Column(
+            "watched_status",
+            postgresql.ENUM(name="watched_status", create_type=False),
+            nullable=False,
+            server_default="not_watched",
+        ),
+        sa.Column(
+            "source",
+            postgresql.ENUM(name="media_source", create_type=False),
+            nullable=False,
+        ),
         sa.Column("added_by", sa.String(255), nullable=True),
         sa.Column("notes", sa.Text, nullable=True),
     )
@@ -589,14 +672,25 @@ def upgrade() -> None:
         sa.Column("telegram_id", sa.BigInteger, primary_key=True),
         sa.Column("display_name", sa.String(255), nullable=True),
         sa.Column("added_by_telegram_id", sa.BigInteger, nullable=True),
-        sa.Column("added_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "added_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
     )
 
 
 def downgrade() -> None:
     op.drop_table("media")
     op.drop_table("bot_users")
-    for t in ("media_type", "media_category", "cartoon_subtype", "watched_status", "media_source"):
+    for t in (
+        "media_type",
+        "media_category",
+        "cartoon_subtype",
+        "watched_status",
+        "media_source",
+    ):
         op.execute(f"DROP TYPE {t}")
 ```
 
@@ -640,6 +734,7 @@ from app.main import app
 # Pre-hash of "testpassword" — generate with: python3 -c "from passlib.hash import bcrypt; print(bcrypt.hash('testpassword'))"
 TEST_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"
 
+
 @pytest.fixture
 def env_overrides(monkeypatch):
     monkeypatch.setenv("WEB_USER_1_LOGIN", "testuser")
@@ -653,22 +748,32 @@ def env_overrides(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_login_success(env_overrides):
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        resp = await client.post("/api/auth/login", json={"login": "testuser", "password": "testpassword"})
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        resp = await client.post(
+            "/api/auth/login", json={"login": "testuser", "password": "testpassword"}
+        )
     assert resp.status_code == 200
     assert "access_token" in resp.cookies
 
 
 @pytest.mark.asyncio
 async def test_login_wrong_password(env_overrides):
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        resp = await client.post("/api/auth/login", json={"login": "testuser", "password": "wrong"})
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        resp = await client.post(
+            "/api/auth/login", json={"login": "testuser", "password": "wrong"}
+        )
     assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
 async def test_me_without_token(env_overrides):
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         resp = await client.get("/api/auth/me")
     assert resp.status_code == 401
 ```
@@ -742,19 +847,25 @@ def authenticate_user(login: str, password: str) -> str | None:
 
 def create_access_token(login: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(hours=settings.jwt_expire_hours)
-    return jwt.encode({"sub": login, "exp": expire}, settings.jwt_secret, algorithm="HS256")
+    return jwt.encode(
+        {"sub": login, "exp": expire}, settings.jwt_secret, algorithm="HS256"
+    )
 
 
 def get_current_user(access_token: str | None = Cookie(default=None)) -> str:
     if not access_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+        )
     try:
         payload = jwt.decode(access_token, settings.jwt_secret, algorithms=["HS256"])
         login: str = payload.get("sub", "")
         if not login:
             raise ValueError
     except (JWTError, ValueError):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
     return login
 ```
 
@@ -778,7 +889,9 @@ class LoginRequest(BaseModel):
 async def login(body: LoginRequest, response: Response):
     login_str = authenticate_user(body.login, body.password)
     if not login_str:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
     token = create_access_token(login_str)
     response.set_cookie(
         key="access_token",
@@ -870,6 +983,7 @@ from app.models import Base
 
 TEST_DB = "postgresql+asyncpg://catalog:changeme@localhost/moviecatalog_test"
 
+
 @pytest.fixture(scope="session")
 async def db_engine():
     engine = create_async_engine(TEST_DB)
@@ -880,6 +994,7 @@ async def db_engine():
         await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
 
+
 @pytest.fixture
 async def db_session(db_engine):
     factory = async_sessionmaker(db_engine, expire_on_commit=False)
@@ -887,20 +1002,26 @@ async def db_session(db_engine):
         yield session
         await session.rollback()
 
+
 @pytest.fixture
 async def client(db_session):
     app.dependency_overrides[get_db] = lambda: db_session
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as c:
         # Set a fake auth cookie bypassing password check for these tests
         c.cookies.set("access_token", _make_test_token())
         yield c
     app.dependency_overrides.clear()
 
+
 def _make_test_token():
     from app.auth import create_access_token
     import os
+
     os.environ.setdefault("JWT_SECRET", "testsecret")
     return create_access_token("testuser")
+
 
 MEDIA_PAYLOAD = {
     "title": "Toy Story",
@@ -916,6 +1037,7 @@ MEDIA_PAYLOAD = {
     "watched_status": "not_watched",
 }
 
+
 @pytest.mark.asyncio
 async def test_create_and_list(client):
     resp = await client.post("/api/media", json=MEDIA_PAYLOAD)
@@ -928,6 +1050,7 @@ async def test_create_and_list(client):
     assert data["total"] >= 1
     assert any(m["id"] == media_id for m in data["items"])
 
+
 @pytest.mark.asyncio
 async def test_get_by_id(client):
     resp = await client.post("/api/media", json=MEDIA_PAYLOAD)
@@ -936,13 +1059,17 @@ async def test_get_by_id(client):
     assert resp.status_code == 200
     assert resp.json()["title"] == "Toy Story"
 
+
 @pytest.mark.asyncio
 async def test_patch(client):
     resp = await client.post("/api/media", json=MEDIA_PAYLOAD)
     media_id = resp.json()["id"]
-    resp = await client.patch(f"/api/media/{media_id}", json={"watched_status": "watched"})
+    resp = await client.patch(
+        f"/api/media/{media_id}", json={"watched_status": "watched"}
+    )
     assert resp.status_code == 200
     assert resp.json()["watched_status"] == "watched"
+
 
 @pytest.mark.asyncio
 async def test_delete(client):
@@ -953,6 +1080,7 @@ async def test_delete(client):
     resp = await client.get(f"/api/media/{media_id}")
     assert resp.status_code == 404
 
+
 @pytest.mark.asyncio
 async def test_stats(client):
     resp = await client.get("/api/stats")
@@ -961,6 +1089,7 @@ async def test_stats(client):
     assert "total" in data
     assert "by_category" in data
     assert "by_watched_status" in data
+
 
 @pytest.mark.asyncio
 async def test_random(client):
@@ -978,7 +1107,13 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from app.models import CartoonSubtype, MediaCategory, MediaSource, MediaType, WatchedStatus
+from app.models import (
+    CartoonSubtype,
+    MediaCategory,
+    MediaSource,
+    MediaType,
+    WatchedStatus,
+)
 
 
 class MediaCreate(BaseModel):
@@ -1080,7 +1215,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import get_current_user
 from app.database import get_db
 from app.models import Media, MediaCategory, MediaType, WatchedStatus
-from app.schemas import MediaCreate, MediaListResponse, MediaResponse, MediaUpdate, StatsResponse
+from app.schemas import (
+    MediaCreate,
+    MediaListResponse,
+    MediaResponse,
+    MediaUpdate,
+    StatsResponse,
+)
 
 router = APIRouter(prefix="/api/media", tags=["media"])
 
@@ -1110,7 +1251,11 @@ async def list_media(
     total_q = select(func.count()).select_from(q.subquery())
     total = (await db.execute(total_q)).scalar_one()
 
-    q = q.order_by(Media.added_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    q = (
+        q.order_by(Media.added_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     items = (await db.execute(q)).scalars().all()
     return MediaListResponse(items=items, total=total, page=page, page_size=page_size)
 
@@ -1145,18 +1290,31 @@ async def stats(
     total = (await db.execute(select(func.count(Media.id)))).scalar_one()
 
     by_type: dict[str, int] = {}
-    for row in (await db.execute(select(Media.type, func.count()).group_by(Media.type))).all():
+    for row in (
+        await db.execute(select(Media.type, func.count()).group_by(Media.type))
+    ).all():
         by_type[row[0].value] = row[1]
 
     by_category: dict[str, int] = {}
-    for row in (await db.execute(select(Media.category, func.count()).group_by(Media.category))).all():
+    for row in (
+        await db.execute(select(Media.category, func.count()).group_by(Media.category))
+    ).all():
         by_category[row[0].value] = row[1]
 
     by_watched: dict[str, int] = {}
-    for row in (await db.execute(select(Media.watched_status, func.count()).group_by(Media.watched_status))).all():
+    for row in (
+        await db.execute(
+            select(Media.watched_status, func.count()).group_by(Media.watched_status)
+        )
+    ).all():
         by_watched[row[0].value] = row[1]
 
-    return StatsResponse(total=total, by_type=by_type, by_category=by_category, by_watched_status=by_watched)
+    return StatsResponse(
+        total=total,
+        by_type=by_type,
+        by_category=by_category,
+        by_watched_status=by_watched,
+    )
 
 
 @router.post("", response_model=MediaResponse, status_code=status.HTTP_201_CREATED)
@@ -1218,6 +1376,7 @@ Add `media_router` to `backend/app/main.py`:
 
 ```python
 from app.routers.media_router import router as media_router
+
 # ... inside create_app or after app definition:
 app.include_router(media_router)
 ```
@@ -1260,20 +1419,31 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 # ---- TMDB ----
 
+
 @pytest.mark.asyncio
 async def test_tmdb_search_multi_returns_candidates():
     fake_results = [
-        {"id": 862, "media_type": "movie", "title": "Toy Story",
-         "original_title": "Toy Story", "release_date": "1995-11-22",
-         "overview": "A cowboy doll...", "poster_path": "/toy.jpg",
-         "genre_ids": [16, 35], "vote_average": 8.0}
+        {
+            "id": 862,
+            "media_type": "movie",
+            "title": "Toy Story",
+            "original_title": "Toy Story",
+            "release_date": "1995-11-22",
+            "overview": "A cowboy doll...",
+            "poster_path": "/toy.jpg",
+            "genre_ids": [16, 35],
+            "vote_average": 8.0,
+        }
     ]
     fake_response = MagicMock()
     fake_response.json.return_value = {"results": fake_results}
     fake_response.raise_for_status = MagicMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response
+    ):
         from app.services.tmdb import search_multi
+
         results = await search_multi("Toy Story", language="en-US")
 
     assert len(results) == 1
@@ -1284,9 +1454,13 @@ async def test_tmdb_search_multi_returns_candidates():
 @pytest.mark.asyncio
 async def test_tmdb_get_details_movie():
     fake_detail = {
-        "id": 862, "title": "Toy Story", "original_title": "Toy Story",
-        "release_date": "1995-11-22", "overview": "A cowboy doll...",
-        "poster_path": "/toy.jpg", "vote_average": 8.0,
+        "id": 862,
+        "title": "Toy Story",
+        "original_title": "Toy Story",
+        "release_date": "1995-11-22",
+        "overview": "A cowboy doll...",
+        "poster_path": "/toy.jpg",
+        "vote_average": 8.0,
         "genres": [{"id": 16, "name": "Animation"}],
         "credits": {"cast": [{"name": "Tom Hanks", "order": 0}]},
         "origin_country": ["US"],
@@ -1295,8 +1469,11 @@ async def test_tmdb_get_details_movie():
     fake_response.json.return_value = fake_detail
     fake_response.raise_for_status = MagicMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response
+    ):
         from app.services.tmdb import get_details
+
         detail = await get_details(862, "movie", language="en-US")
 
     assert detail["title"] == "Toy Story"
@@ -1305,10 +1482,13 @@ async def test_tmdb_get_details_movie():
 
 # ---- OpenAI ----
 
+
 @pytest.mark.asyncio
 async def test_openai_classify_returns_category():
     fake_choice = MagicMock()
-    fake_choice.message.content = json.dumps({"category": "cartoon", "cartoon_subtype": "pixar"})
+    fake_choice.message.content = json.dumps(
+        {"category": "cartoon", "cartoon_subtype": "pixar"}
+    )
     fake_completion = MagicMock()
     fake_completion.choices = [fake_choice]
 
@@ -1317,6 +1497,7 @@ async def test_openai_classify_returns_category():
 
     with patch("app.services.openai_client._client", mock_client):
         from app.services.openai_client import classify_media
+
         result = await classify_media("Toy Story", ["Animation"], "A cowboy...", ["US"])
 
     assert result["category"] == "cartoon"
@@ -1335,6 +1516,7 @@ async def test_openai_translate():
 
     with patch("app.services.openai_client._client", mock_client):
         from app.services.openai_client import translate_to_russian
+
         result = await translate_to_russian("Toy Story")
 
     assert result == "История игрушек"
@@ -1361,7 +1543,11 @@ async def search_multi(query: str, language: str = "ru-RU") -> list[dict[str, An
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{_TMDB_BASE}/search/multi",
-            params={"api_key": settings.tmdb_api_key, "query": query, "language": language},
+            params={
+                "api_key": settings.tmdb_api_key,
+                "query": query,
+                "language": language,
+            },
         )
         resp.raise_for_status()
     results = []
@@ -1372,26 +1558,34 @@ async def search_multi(query: str, language: str = "ru-RU") -> list[dict[str, An
         title = r.get("title") or r.get("name", "")
         release = r.get("release_date") or r.get("first_air_date", "")
         year = int(release[:4]) if release else None
-        results.append({
-            "tmdb_id": r["id"],
-            "media_type": media_type,
-            "title": title,
-            "year": year,
-            "description": r.get("overview"),
-            "poster_url": _poster(r.get("poster_path")),
-            "genres": r.get("genre_ids", []),  # IDs only at search level
-            "rating": r.get("vote_average"),
-        })
+        results.append(
+            {
+                "tmdb_id": r["id"],
+                "media_type": media_type,
+                "title": title,
+                "year": year,
+                "description": r.get("overview"),
+                "poster_url": _poster(r.get("poster_path")),
+                "genres": r.get("genre_ids", []),  # IDs only at search level
+                "rating": r.get("vote_average"),
+            }
+        )
     return results
 
 
-async def get_details(tmdb_id: int, media_type: str, language: str = "ru-RU") -> dict[str, Any]:
+async def get_details(
+    tmdb_id: int, media_type: str, language: str = "ru-RU"
+) -> dict[str, Any]:
     """media_type: 'movie' or 'tv'"""
     endpoint = "movie" if media_type == "movie" else "tv"
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{_TMDB_BASE}/{endpoint}/{tmdb_id}",
-            params={"api_key": settings.tmdb_api_key, "language": language, "append_to_response": "credits"},
+            params={
+                "api_key": settings.tmdb_api_key,
+                "language": language,
+                "append_to_response": "credits",
+            },
         )
         resp.raise_for_status()
     d = resp.json()
@@ -1400,7 +1594,9 @@ async def get_details(tmdb_id: int, media_type: str, language: str = "ru-RU") ->
     year = int(release[:4]) if release else None
     genres = [g["name"] for g in d.get("genres", [])]
     actors = [c["name"] for c in d.get("credits", {}).get("cast", [])[:10]]
-    origin = d.get("origin_country", [d.get("production_countries", [{}])[0].get("iso_3166_1", "")])
+    origin = d.get(
+        "origin_country", [d.get("production_countries", [{}])[0].get("iso_3166_1", "")]
+    )
     return {
         "tmdb_id": tmdb_id,
         "media_type": media_type,
@@ -1443,7 +1639,10 @@ async def translate_to_russian(text: str) -> str:
     resp = await _client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Translate the following movie description to Russian. Return only the translation."},
+            {
+                "role": "system",
+                "content": "Translate the following movie description to Russian. Return only the translation.",
+            },
             {"role": "user", "content": text},
         ],
     )
@@ -1475,6 +1674,7 @@ async def classify_media(
 async def extract_from_screenshot(image_bytes: bytes) -> dict[str, Any]:
     """Returns {"title": str, "year_hint": int|None}"""
     import base64
+
     b64 = base64.b64encode(image_bytes).decode()
     resp = await _client.chat.completions.create(
         model="gpt-4o",
@@ -1484,7 +1684,10 @@ async def extract_from_screenshot(image_bytes: bytes) -> dict[str, Any]:
                 "role": "user",
                 "content": [
                     {"type": "text", "text": "What movie or series is shown?"},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                    },
                 ],
             },
         ],
@@ -1496,7 +1699,7 @@ async def extract_from_screenshot(image_bytes: bytes) -> dict[str, Any]:
 async def generate_disambiguation_question(candidates: list[dict]) -> str:
     """Given a list of candidate dicts, generate a clarifying question."""
     lines = "\n".join(
-        f"{i+1}. {c['title']} ({c.get('year', '?')}) — {c.get('description', '')[:80]}"
+        f"{i + 1}. {c['title']} ({c.get('year', '?')}) — {c.get('description', '')[:80]}"
         for i, c in enumerate(candidates)
     )
     resp = await _client.chat.completions.create(
@@ -1601,28 +1804,49 @@ app.dependency_overrides[get_current_user] = lambda: "testuser"
 
 FAKE_CANDIDATES = [
     {
-        "tmdb_id": 862, "media_type": "movie", "title": "Toy Story",
-        "year": 1995, "description": "A cowboy doll...",
+        "tmdb_id": 862,
+        "media_type": "movie",
+        "title": "Toy Story",
+        "year": 1995,
+        "description": "A cowboy doll...",
         "poster_url": "https://image.tmdb.org/t/p/w500/toy.jpg",
-        "genres": ["Animation"], "rating": 8.0,
+        "genres": ["Animation"],
+        "rating": 8.0,
     }
 ]
 
 FAKE_DETAILS = {
-    "tmdb_id": 862, "media_type": "movie", "title": "Toy Story",
-    "year": 1995, "description": "История игрушек...",
+    "tmdb_id": 862,
+    "media_type": "movie",
+    "title": "Toy Story",
+    "year": 1995,
+    "description": "История игрушек...",
     "poster_url": "https://image.tmdb.org/t/p/w500/toy.jpg",
-    "genres": ["Animation"], "actors": ["Tom Hanks"],
-    "rating": 8.0, "origin_country": ["US"],
+    "genres": ["Animation"],
+    "actors": ["Tom Hanks"],
+    "rating": 8.0,
+    "origin_country": ["US"],
     "external_ids": {"tmdb": 862},
 }
 
 
 @pytest.mark.asyncio
 async def test_resolve_returns_candidates():
-    with patch("app.routers.resolve_router.search_multi", new_callable=AsyncMock, return_value=FAKE_CANDIDATES), \
-         patch("app.routers.resolve_router.classify_media", new_callable=AsyncMock, return_value={"category": "cartoon", "cartoon_subtype": "pixar"}):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    with (
+        patch(
+            "app.routers.resolve_router.search_multi",
+            new_callable=AsyncMock,
+            return_value=FAKE_CANDIDATES,
+        ),
+        patch(
+            "app.routers.resolve_router.classify_media",
+            new_callable=AsyncMock,
+            return_value={"category": "cartoon", "cartoon_subtype": "pixar"},
+        ),
+    ):
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             resp = await client.post("/api/resolve", json={"query": "Toy Story"})
     assert resp.status_code == 200
     data = resp.json()
@@ -1632,15 +1856,36 @@ async def test_resolve_returns_candidates():
 
 @pytest.mark.asyncio
 async def test_confirm_saves_to_db():
-    with patch("app.routers.resolve_router.get_details", new_callable=AsyncMock, return_value=FAKE_DETAILS), \
-         patch("app.routers.resolve_router.upload_poster", new_callable=AsyncMock, return_value="http://minio:9000/posters/862.jpg"), \
-         patch("app.routers.resolve_router.translate_to_russian", new_callable=AsyncMock, return_value="История игрушек"):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            resp = await client.post("/api/media/confirm", json={
-                "tmdb_id": 862, "media_type": "movie",
-                "category": "cartoon", "cartoon_subtype": "pixar",
-                "source": "web_ui",
-            })
+    with (
+        patch(
+            "app.routers.resolve_router.get_details",
+            new_callable=AsyncMock,
+            return_value=FAKE_DETAILS,
+        ),
+        patch(
+            "app.routers.resolve_router.upload_poster",
+            new_callable=AsyncMock,
+            return_value="http://minio:9000/posters/862.jpg",
+        ),
+        patch(
+            "app.routers.resolve_router.translate_to_russian",
+            new_callable=AsyncMock,
+            return_value="История игрушек",
+        ),
+    ):
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            resp = await client.post(
+                "/api/media/confirm",
+                json={
+                    "tmdb_id": 862,
+                    "media_type": "movie",
+                    "category": "cartoon",
+                    "cartoon_subtype": "pixar",
+                    "source": "web_ui",
+                },
+            )
     assert resp.status_code == 201
     assert resp.json()["title"] == "Toy Story"
 ```
@@ -1656,7 +1901,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import CartoonSubtype, Media, MediaCategory, MediaSource, MediaType, WatchedStatus
+from app.models import (
+    CartoonSubtype,
+    Media,
+    MediaCategory,
+    MediaSource,
+    MediaType,
+    WatchedStatus,
+)
 from app.schemas import CandidateResponse, MediaResponse
 from app.services.openai_client import (
     classify_media,
@@ -1711,18 +1963,22 @@ async def resolve(
 
     result = []
     for c in candidates[:5]:
-        result.append(CandidateResponse(
-            tmdb_id=c["tmdb_id"],
-            media_type=c["media_type"],
-            title=c["title"],
-            title_ru=None,
-            year=c.get("year"),
-            description=c.get("description"),
-            poster_url=c.get("poster_url"),
-            genres=c.get("genres", []),
-            rating=c.get("rating"),
-            disambiguation_question=disambiguation_question if len(candidates) > 1 else None,
-        ))
+        result.append(
+            CandidateResponse(
+                tmdb_id=c["tmdb_id"],
+                media_type=c["media_type"],
+                title=c["title"],
+                title_ru=None,
+                year=c.get("year"),
+                description=c.get("description"),
+                poster_url=c.get("poster_url"),
+                genres=c.get("genres", []),
+                rating=c.get("rating"),
+                disambiguation_question=disambiguation_question
+                if len(candidates) > 1
+                else None,
+            )
+        )
     return result
 
 
@@ -1735,7 +1991,9 @@ async def resolve_screenshot(
     extracted = await extract_from_screenshot(image_bytes)
     title = extracted.get("title", "")
     if not title:
-        raise HTTPException(status_code=422, detail="Could not extract title from screenshot")
+        raise HTTPException(
+            status_code=422, detail="Could not extract title from screenshot"
+        )
 
     candidates = await search_multi(title, language="ru-RU")
     if not candidates:
@@ -1775,7 +2033,9 @@ async def confirm(
     if not details.get("description"):
         details_en = await get_details(body.tmdb_id, body.media_type, language="en-US")
         if details_en.get("description"):
-            details["description"] = await translate_to_russian(details_en["description"])
+            details["description"] = await translate_to_russian(
+                details_en["description"]
+            )
         details["title"] = details.get("title") or details_en.get("title", "")
 
     # Determine media type from TMDB media_type field
@@ -1814,6 +2074,7 @@ async def confirm(
 Add `resolve_router` to `backend/app/main.py`:
 ```python
 from app.routers.resolve_router import router as resolve_router
+
 app.include_router(resolve_router)
 ```
 
@@ -1880,7 +2141,9 @@ async def test_whitelist_middleware_allows_known_user():
     mock_response = MagicMock()
     mock_response.status_code = 200
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response
+    ):
         # Simulate a message event
         event = MagicMock()
         event.from_user = MagicMock()
@@ -1911,7 +2174,9 @@ async def test_whitelist_middleware_blocks_unknown_user():
     mock_response = MagicMock()
     mock_response.status_code = 404
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response
+    ):
         event = MagicMock()
         event.from_user = MagicMock()
         event.from_user.id = 99999
@@ -1999,8 +2264,17 @@ async def check_user(telegram_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.get("/users")
 async def list_users(db: AsyncSession = Depends(get_db)):
-    users = (await db.execute(select(BotUser).order_by(BotUser.added_at))).scalars().all()
-    return [{"telegram_id": u.telegram_id, "display_name": u.display_name, "added_at": u.added_at} for u in users]
+    users = (
+        (await db.execute(select(BotUser).order_by(BotUser.added_at))).scalars().all()
+    )
+    return [
+        {
+            "telegram_id": u.telegram_id,
+            "display_name": u.display_name,
+            "added_at": u.added_at,
+        }
+        for u in users
+    ]
 
 
 @router.post("/users", status_code=status.HTTP_201_CREATED)
@@ -2030,6 +2304,7 @@ async def remove_user(telegram_id: int, db: AsyncSession = Depends(get_db)):
 Add to `backend/app/main.py`:
 ```python
 from app.routers.bot_router import router as bot_router
+
 app.include_router(bot_router)
 ```
 
@@ -2066,7 +2341,9 @@ class WhitelistMiddleware(BaseMiddleware):
         if allowed is None:
             try:
                 async with httpx.AsyncClient() as client:
-                    resp = await client.get(f"{self._backend_url}/api/bot/users/{tid}", timeout=5)
+                    resp = await client.get(
+                        f"{self._backend_url}/api/bot/users/{tid}", timeout=5
+                    )
                 allowed = resp.status_code == 200
             except Exception:
                 allowed = False
@@ -2111,7 +2388,11 @@ async def cmd_adduser(message: Message):
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{_BACKEND}/api/bot/users",
-            json={"telegram_id": telegram_id, "display_name": display_name, "added_by_telegram_id": message.from_user.id},
+            json={
+                "telegram_id": telegram_id,
+                "display_name": display_name,
+                "added_by_telegram_id": message.from_user.id,
+            },
         )
 
     if resp.status_code == 201:
@@ -2158,7 +2439,9 @@ async def cmd_users(message: Message):
         await message.answer("Список пользователей пуст.")
         return
 
-    lines = [f"• {u['telegram_id']} — {u.get('display_name') or 'без имени'}" for u in users]
+    lines = [
+        f"• {u['telegram_id']} — {u.get('display_name') or 'без имени'}" for u in users
+    ]
     await message.answer("Пользователи:\n" + "\n".join(lines))
 ```
 
@@ -2230,15 +2513,21 @@ async def cmd_stats(message: Message):
     if by_cat:
         lines.append("\n<b>По категориям:</b>")
         labels = {
-            "cartoon": "Мультфильмы", "family_movie": "Семейные фильмы",
-            "adult_movie": "Взрослые фильмы", "kids_series": "Детские сериалы",
+            "cartoon": "Мультфильмы",
+            "family_movie": "Семейные фильмы",
+            "adult_movie": "Взрослые фильмы",
+            "kids_series": "Детские сериалы",
             "adult_series": "Взрослые сериалы",
         }
         for k, v in by_cat.items():
             lines.append(f"  {labels.get(k, k)}: {v}")
     if by_status:
         lines.append("\n<b>По статусу:</b>")
-        slabels = {"not_watched": "Не смотрели", "watching": "Смотрим", "watched": "Просмотрено"}
+        slabels = {
+            "not_watched": "Не смотрели",
+            "watching": "Смотрим",
+            "watched": "Просмотрено",
+        }
         for k, v in by_status.items():
             lines.append(f"  {slabels.get(k, k)}: {v}")
 
@@ -2265,7 +2554,9 @@ async def cmd_random(message: Message):
     m = resp.json()
     title = m.get("title_ru") or m.get("title", "")
     year = m.get("year", "")
-    status_emoji = {"not_watched": "👀", "watching": "▶️", "watched": "✅"}.get(m.get("watched_status", ""), "")
+    status_emoji = {"not_watched": "👀", "watching": "▶️", "watched": "✅"}.get(
+        m.get("watched_status", ""), ""
+    )
     await message.answer(f"{status_emoji} <b>{title}</b> ({year})", parse_mode="HTML")
 
 
@@ -2396,14 +2687,22 @@ SUBTYPE_LABELS = {
 }
 
 
-def _candidate_keyboard(candidates: list[dict], show_other: bool = True) -> InlineKeyboardMarkup:
+def _candidate_keyboard(
+    candidates: list[dict], show_other: bool = True
+) -> InlineKeyboardMarkup:
     buttons = []
     for i, c in enumerate(candidates):
         label = f"{c['title']} ({c.get('year') or '?'})"
-        buttons.append([InlineKeyboardButton(text=label, callback_data=f"candidate:{i}")])
+        buttons.append(
+            [InlineKeyboardButton(text=label, callback_data=f"candidate:{i}")]
+        )
     if show_other:
-        buttons.append([InlineKeyboardButton(text="Это другое", callback_data="candidate:other")])
-    buttons.append([InlineKeyboardButton(text="Отмена", callback_data="candidate:cancel")])
+        buttons.append(
+            [InlineKeyboardButton(text="Это другое", callback_data="candidate:other")]
+        )
+    buttons.append(
+        [InlineKeyboardButton(text="Отмена", callback_data="candidate:cancel")]
+    )
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
@@ -2412,7 +2711,9 @@ def _category_keyboard() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text=label, callback_data=f"category:{key}")]
         for key, label in CATEGORY_LABELS.items()
     ]
-    buttons.append([InlineKeyboardButton(text="Отмена", callback_data="candidate:cancel")])
+    buttons.append(
+        [InlineKeyboardButton(text="Отмена", callback_data="candidate:cancel")]
+    )
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
@@ -2425,15 +2726,19 @@ def _subtype_keyboard() -> InlineKeyboardMarkup:
 
 
 def _confirm_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="✅ Добавить", callback_data="confirm:yes"),
-            InlineKeyboardButton(text="❌ Отмена", callback_data="confirm:no"),
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ Добавить", callback_data="confirm:yes"),
+                InlineKeyboardButton(text="❌ Отмена", callback_data="confirm:no"),
+            ]
         ]
-    ])
+    )
 
 
-async def _resolve_and_show(message: Message, state: FSMContext, query: str = None, image_bytes: bytes = None):
+async def _resolve_and_show(
+    message: Message, state: FSMContext, query: str = None, image_bytes: bytes = None
+):
     """Call backend resolve and display candidates."""
     await message.answer("🔍 Ищу в TMDB...")
 
@@ -2445,7 +2750,9 @@ async def _resolve_and_show(message: Message, state: FSMContext, query: str = No
                 timeout=30,
             )
         else:
-            resp = await client.post(f"{_BACKEND}/api/resolve", json={"query": query}, timeout=15)
+            resp = await client.post(
+                f"{_BACKEND}/api/resolve", json={"query": query}, timeout=15
+            )
 
     if resp.status_code != 200:
         await message.answer(f"Ошибка поиска: {resp.status_code}")
@@ -2470,9 +2777,14 @@ async def _resolve_and_show(message: Message, state: FSMContext, query: str = No
         await message.answer(text, reply_markup=_confirm_keyboard(), parse_mode="HTML")
         await state.update_data(selected_index=0)
     else:
-        dq = candidates[0].get("disambiguation_question") or "Какой из вариантов вы имели в виду?"
+        dq = (
+            candidates[0].get("disambiguation_question")
+            or "Какой из вариантов вы имели в виду?"
+        )
         text = f"{dq}\n"
-        await message.answer(text, reply_markup=_candidate_keyboard(candidates), parse_mode="HTML")
+        await message.answer(
+            text, reply_markup=_candidate_keyboard(candidates), parse_mode="HTML"
+        )
 
 
 # /add command
@@ -2511,7 +2823,9 @@ async def receive_photo(message: Message, state: FSMContext):
     photo = message.photo[-1]  # largest size
     file = await message.bot.get_file(photo.file_id)
     downloaded = await message.bot.download_file(file.file_path)
-    image_bytes = downloaded.read() if hasattr(downloaded, "read") else bytes(downloaded)
+    image_bytes = (
+        downloaded.read() if hasattr(downloaded, "read") else bytes(downloaded)
+    )
     await _resolve_and_show(message, state, image_bytes=image_bytes)
 
 
@@ -2543,7 +2857,9 @@ async def on_candidate_select(callback: CallbackQuery, state: FSMContext):
         f"{selected.get('description', '')[:200]}\n\n"
         f"Добавить в каталог?"
     )
-    await callback.message.edit_text(text, reply_markup=_confirm_keyboard(), parse_mode="HTML")
+    await callback.message.edit_text(
+        text, reply_markup=_confirm_keyboard(), parse_mode="HTML"
+    )
 
 
 # Confirm add (single candidate path or after candidate selection)
@@ -2558,8 +2874,12 @@ async def on_confirm_yes(callback: CallbackQuery, state: FSMContext):
     # Check if category is already set (single-candidate pre-classification)
     category = selected.get("category")
     if category:
-        await state.update_data(selected_category=category, selected_subtype=selected.get("cartoon_subtype"))
-        await _do_confirm(callback.message, state, selected, category, selected.get("cartoon_subtype"))
+        await state.update_data(
+            selected_category=category, selected_subtype=selected.get("cartoon_subtype")
+        )
+        await _do_confirm(
+            callback.message, state, selected, category, selected.get("cartoon_subtype")
+        )
     else:
         await state.set_state(AddMedia.confirming_category)
         await callback.message.edit_text(
@@ -2585,7 +2905,9 @@ async def on_category_select(callback: CallbackQuery, state: FSMContext):
 
     if category == "cartoon":
         await state.set_state(AddMedia.confirming_add)
-        await callback.message.edit_text("Выберите тип мультфильма:", reply_markup=_subtype_keyboard())
+        await callback.message.edit_text(
+            "Выберите тип мультфильма:", reply_markup=_subtype_keyboard()
+        )
     else:
         data = await state.get_data()
         candidates = data["candidates"]
@@ -2605,7 +2927,13 @@ async def on_subtype_select(callback: CallbackQuery, state: FSMContext):
     await _do_confirm(callback.message, state, selected, category, subtype)
 
 
-async def _do_confirm(message, state: FSMContext, candidate: dict, category: str, cartoon_subtype: str | None):
+async def _do_confirm(
+    message,
+    state: FSMContext,
+    candidate: dict,
+    category: str,
+    cartoon_subtype: str | None,
+):
     """POST /api/media/confirm and show result."""
     await state.clear()
     async with httpx.AsyncClient() as client:
@@ -2625,13 +2953,17 @@ async def _do_confirm(message, state: FSMContext, candidate: dict, category: str
         media = resp.json()
         title = media.get("title_ru") or media.get("title", "")
         year = media.get("year", "")
-        cat_label = CATEGORY_LABELS.get(media.get("category", ""), media.get("category", ""))
+        cat_label = CATEGORY_LABELS.get(
+            media.get("category", ""), media.get("category", "")
+        )
         await message.edit_text(
             f"✅ <b>{title}</b> ({year}) добавлен!\nКатегория: {cat_label}",
             parse_mode="HTML",
         )
     else:
-        await message.edit_text(f"Ошибка добавления: {resp.status_code}\n{resp.text[:200]}")
+        await message.edit_text(
+            f"Ошибка добавления: {resp.status_code}\n{resp.text[:200]}"
+        )
 ```
 
 - [ ] **Step 2: Register add router in `bot/main.py`**
@@ -2639,6 +2971,7 @@ async def _do_confirm(message, state: FSMContext, candidate: dict, category: str
 Uncomment or add:
 ```python
 from bot.handlers import add as add_handler
+
 dp.include_router(add_handler.router)
 ```
 
@@ -2681,7 +3014,12 @@ git commit -m "Task 8: bot add flow — text/photo resolve, inline candidate sel
 import httpx
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
 
 from bot.config import settings
 
@@ -2691,13 +3029,23 @@ _BACKEND = settings.backend_url
 STATUS_EMOJI = {"not_watched": "👀", "watching": "▶️", "watched": "✅"}
 
 
-def _pagination_keyboard(page: int, total: int, page_size: int, prefix: str) -> InlineKeyboardMarkup:
+def _pagination_keyboard(
+    page: int, total: int, page_size: int, prefix: str
+) -> InlineKeyboardMarkup:
     buttons = []
     row = []
     if page > 1:
-        row.append(InlineKeyboardButton(text="◀ Назад", callback_data=f"{prefix}:page:{page - 1}"))
+        row.append(
+            InlineKeyboardButton(
+                text="◀ Назад", callback_data=f"{prefix}:page:{page - 1}"
+            )
+        )
     if page * page_size < total:
-        row.append(InlineKeyboardButton(text="Вперёд ▶", callback_data=f"{prefix}:page:{page + 1}"))
+        row.append(
+            InlineKeyboardButton(
+                text="Вперёд ▶", callback_data=f"{prefix}:page:{page + 1}"
+            )
+        )
     if row:
         buttons.append(row)
     return InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None
@@ -2769,7 +3117,9 @@ async def cmd_find(message: Message):
     query = args[1].strip()
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/media", params={"search": query, "page_size": 20})
+        resp = await client.get(
+            f"{_BACKEND}/api/media", params={"search": query, "page_size": 20}
+        )
 
     if resp.status_code != 200:
         await message.answer(f"Ошибка: {resp.status_code}")
@@ -2791,7 +3141,12 @@ import httpx
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
 
 from bot.config import settings
 from bot.states import DeleteConfirm, EditMedia
@@ -2802,11 +3157,14 @@ _BACKEND = settings.backend_url
 
 async def _search_media(query: str) -> list[dict]:
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/media", params={"search": query, "page_size": 5})
+        resp = await client.get(
+            f"{_BACKEND}/api/media", params={"search": query, "page_size": 5}
+        )
     return resp.json().get("items", []) if resp.status_code == 200 else []
 
 
 # ---- DELETE ----
+
 
 @router.message(Command("delete"))
 async def cmd_delete(message: Message, state: FSMContext):
@@ -2823,25 +3181,37 @@ async def cmd_delete(message: Message, state: FSMContext):
     if len(items) == 1:
         m = items[0]
         await state.set_state(DeleteConfirm.confirming)
-        await state.update_data(media_id=m["id"], title=(m.get("title_ru") or m.get("title")))
-        kb = InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text="🗑 Удалить", callback_data="delete:yes"),
-            InlineKeyboardButton(text="Отмена", callback_data="delete:no"),
-        ]])
+        await state.update_data(
+            media_id=m["id"], title=(m.get("title_ru") or m.get("title"))
+        )
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🗑 Удалить", callback_data="delete:yes"),
+                    InlineKeyboardButton(text="Отмена", callback_data="delete:no"),
+                ]
+            ]
+        )
         await message.answer(
             f"Удалить <b>{m.get('title_ru') or m.get('title')}</b> ({m.get('year')}) из каталога?",
-            reply_markup=kb, parse_mode="HTML",
+            reply_markup=kb,
+            parse_mode="HTML",
         )
     else:
         buttons = [
-            [InlineKeyboardButton(
-                text=f"{m.get('title_ru') or m.get('title')} ({m.get('year')})",
-                callback_data=f"delete_pick:{m['id']}",
-            )]
+            [
+                InlineKeyboardButton(
+                    text=f"{m.get('title_ru') or m.get('title')} ({m.get('year')})",
+                    callback_data=f"delete_pick:{m['id']}",
+                )
+            ]
             for m in items
         ]
         buttons.append([InlineKeyboardButton(text="Отмена", callback_data="delete:no")])
-        await message.answer("Выберите, что удалить:", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+        await message.answer(
+            "Выберите, что удалить:",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        )
 
 
 @router.callback_query(F.data.startswith("delete_pick:"))
@@ -2855,14 +3225,21 @@ async def on_delete_pick(callback: CallbackQuery, state: FSMContext):
         return
     m = resp.json()
     await state.set_state(DeleteConfirm.confirming)
-    await state.update_data(media_id=media_id, title=(m.get("title_ru") or m.get("title")))
-    kb = InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="🗑 Удалить", callback_data="delete:yes"),
-        InlineKeyboardButton(text="Отмена", callback_data="delete:no"),
-    ]])
+    await state.update_data(
+        media_id=media_id, title=(m.get("title_ru") or m.get("title"))
+    )
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="🗑 Удалить", callback_data="delete:yes"),
+                InlineKeyboardButton(text="Отмена", callback_data="delete:no"),
+            ]
+        ]
+    )
     await callback.message.edit_text(
         f"Удалить <b>{m.get('title_ru') or m.get('title')}</b> ({m.get('year')})?",
-        reply_markup=kb, parse_mode="HTML",
+        reply_markup=kb,
+        parse_mode="HTML",
     )
 
 
@@ -2876,7 +3253,9 @@ async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
     async with httpx.AsyncClient() as client:
         resp = await client.delete(f"{_BACKEND}/api/media/{media_id}")
     if resp.status_code == 204:
-        await callback.message.edit_text(f"✅ <b>{title}</b> удалён.", parse_mode="HTML")
+        await callback.message.edit_text(
+            f"✅ <b>{title}</b> удалён.", parse_mode="HTML"
+        )
     else:
         await callback.message.edit_text(f"Ошибка удаления: {resp.status_code}")
 
@@ -2898,9 +3277,25 @@ EDITABLE_FIELDS = {
     "title_ru": "Русское название",
 }
 
-CATEGORY_OPTIONS = {"cartoon": "Мультфильм", "family_movie": "Семейный", "adult_movie": "Взрослый", "kids_series": "Детский сериал", "adult_series": "Взрослый сериал"}
-SUBTYPE_OPTIONS = {"disney": "Disney", "pixar": "Pixar", "soviet": "Советский", "russian": "Российский", "other": "Другой"}
-STATUS_OPTIONS = {"not_watched": "Не смотрели", "watching": "Смотрим", "watched": "Просмотрено"}
+CATEGORY_OPTIONS = {
+    "cartoon": "Мультфильм",
+    "family_movie": "Семейный",
+    "adult_movie": "Взрослый",
+    "kids_series": "Детский сериал",
+    "adult_series": "Взрослый сериал",
+}
+SUBTYPE_OPTIONS = {
+    "disney": "Disney",
+    "pixar": "Pixar",
+    "soviet": "Советский",
+    "russian": "Российский",
+    "other": "Другой",
+}
+STATUS_OPTIONS = {
+    "not_watched": "Не смотрели",
+    "watching": "Смотрим",
+    "watched": "Просмотрено",
+}
 
 
 @router.message(Command("edit"))
@@ -2920,7 +3315,9 @@ async def cmd_edit(message: Message, state: FSMContext):
         [InlineKeyboardButton(text=label, callback_data=f"edit_field:{key}")]
         for key, label in EDITABLE_FIELDS.items()
     ]
-    buttons.append([InlineKeyboardButton(text="Отмена", callback_data="edit_field:cancel")])
+    buttons.append(
+        [InlineKeyboardButton(text="Отмена", callback_data="edit_field:cancel")]
+    )
     title = m.get("title_ru") or m.get("title")
     await message.answer(
         f"Что изменить в <b>{title}</b>?",
@@ -2940,20 +3337,39 @@ async def on_edit_field(callback: CallbackQuery, state: FSMContext):
     await state.update_data(edit_field=field)
 
     if field == "category":
-        buttons = [[InlineKeyboardButton(text=v, callback_data=f"edit_value:{k}")] for k, v in CATEGORY_OPTIONS.items()]
+        buttons = [
+            [InlineKeyboardButton(text=v, callback_data=f"edit_value:{k}")]
+            for k, v in CATEGORY_OPTIONS.items()
+        ]
         await state.set_state(EditMedia.entering_value)
-        await callback.message.edit_text("Выберите категорию:", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+        await callback.message.edit_text(
+            "Выберите категорию:",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        )
     elif field == "cartoon_subtype":
-        buttons = [[InlineKeyboardButton(text=v, callback_data=f"edit_value:{k}")] for k, v in SUBTYPE_OPTIONS.items()]
+        buttons = [
+            [InlineKeyboardButton(text=v, callback_data=f"edit_value:{k}")]
+            for k, v in SUBTYPE_OPTIONS.items()
+        ]
         await state.set_state(EditMedia.entering_value)
-        await callback.message.edit_text("Выберите тип:", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+        await callback.message.edit_text(
+            "Выберите тип:", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
+        )
     elif field == "watched_status":
-        buttons = [[InlineKeyboardButton(text=v, callback_data=f"edit_value:{k}")] for k, v in STATUS_OPTIONS.items()]
+        buttons = [
+            [InlineKeyboardButton(text=v, callback_data=f"edit_value:{k}")]
+            for k, v in STATUS_OPTIONS.items()
+        ]
         await state.set_state(EditMedia.entering_value)
-        await callback.message.edit_text("Выберите статус:", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+        await callback.message.edit_text(
+            "Выберите статус:",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        )
     else:
         await state.set_state(EditMedia.entering_value)
-        await callback.message.edit_text(f"Введите новое значение для «{EDITABLE_FIELDS[field]}»:")
+        await callback.message.edit_text(
+            f"Введите новое значение для «{EDITABLE_FIELDS[field]}»:"
+        )
 
 
 @router.callback_query(F.data.startswith("edit_value:"), EditMedia.entering_value)
@@ -3010,7 +3426,9 @@ async def _set_status(message: Message, status: str):
     query = args[1].strip()
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/media", params={"search": query, "page_size": 1})
+        resp = await client.get(
+            f"{_BACKEND}/api/media", params={"search": query, "page_size": 1}
+        )
 
     if resp.status_code != 200 or not resp.json().get("items"):
         await message.answer("Не найдено.")
@@ -3018,11 +3436,17 @@ async def _set_status(message: Message, status: str):
 
     m = resp.json()["items"][0]
     async with httpx.AsyncClient() as client:
-        resp = await client.patch(f"{_BACKEND}/api/media/{m['id']}", json={"watched_status": status})
+        resp = await client.patch(
+            f"{_BACKEND}/api/media/{m['id']}", json={"watched_status": status}
+        )
 
     if resp.status_code == 200:
         title = m.get("title_ru") or m.get("title")
-        labels = {"not_watched": "не просмотрено", "watching": "смотрим", "watched": "просмотрено"}
+        labels = {
+            "not_watched": "не просмотрено",
+            "watching": "смотрим",
+            "watched": "просмотрено",
+        }
         await message.answer(f"✅ <b>{title}</b> — {labels[status]}", parse_mode="HTML")
     else:
         await message.answer(f"Ошибка: {resp.status_code}")
@@ -3046,7 +3470,11 @@ async def cmd_unwatched(message: Message):
 - [ ] **Step 4: Register all handlers in `bot/main.py`**
 
 ```python
-from bot.handlers import list_ as list_handler, manage as manage_handler, status as status_handler
+from bot.handlers import (
+    list_ as list_handler,
+    manage as manage_handler,
+    status as status_handler,
+)
 
 dp.include_router(list_handler.router)
 dp.include_router(manage_handler.router)

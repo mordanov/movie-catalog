@@ -91,7 +91,7 @@ async def extract_from_screenshot(image_bytes: bytes) -> dict[str, Any]:
 async def generate_disambiguation_question(candidates: list[dict]) -> str:
     """Given a list of candidate dicts, generate a clarifying question."""
     lines = "\n".join(
-        f"{i+1}. {c['title']} ({c.get('year', '?')}) — {c.get('description', '')[:80]}"
+        f"{i + 1}. {c['title']} ({c.get('year', '?')}) — {c.get('description', '')[:80]}"
         for i, c in enumerate(candidates)
     )
     resp = await _ensure_client().chat.completions.create(

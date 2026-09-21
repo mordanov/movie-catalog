@@ -57,7 +57,9 @@ async def cmd_removeuser(message: Message):
         return
 
     async with httpx.AsyncClient() as client:
-        resp = await client.delete(f"{_BACKEND}/api/bot/users/{telegram_id}", headers=_HEADERS)
+        resp = await client.delete(
+            f"{_BACKEND}/api/bot/users/{telegram_id}", headers=_HEADERS
+        )
 
     if resp.status_code == 204:
         await message.answer(f"Пользователь {telegram_id} удалён.")
