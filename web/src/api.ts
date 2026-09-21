@@ -1,4 +1,4 @@
-import type { Candidate, Media, MediaListResponse, MediaUpdate, StatsResponse } from "./types";
+import type { Candidate, Media, MediaListResponse, MediaUpdate, StatsResponse, GenresResponse } from "./types";
 import type { MediaCategory, MediaSource, CartoonSubtype } from "./types";
 
 const BASE = "/api";
@@ -40,6 +40,8 @@ export const api = {
       type?: string;
       watched_status?: string;
       search?: string;
+      sort_by?: string;
+      genre?: string;
     } = {}) => {
       const qs = new URLSearchParams(
         Object.fromEntries(
@@ -85,5 +87,9 @@ export const api = {
 
   stats: {
     get: () => request<StatsResponse>("/stats"),
+  },
+
+  genres: {
+    list: () => request<GenresResponse>("/genres"),
   },
 };

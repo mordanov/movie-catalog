@@ -33,6 +33,7 @@ export interface Media {
   source: MediaSource;
   added_by: string | null;
   notes: string | null;
+  trailer_url: string | null;
 }
 
 export interface MediaListResponse {
@@ -60,6 +61,10 @@ export interface Candidate {
   genres: string[];
   rating: number | null;
   disambiguation_question: string | null;
+}
+
+export interface GenresResponse {
+  genres: string[];
 }
 
 export interface MediaUpdate {
