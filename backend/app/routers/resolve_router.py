@@ -6,7 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import CartoonSubtype, Media, MediaCategory, MediaSource, MediaType, WatchedStatus
+from app.models import (
+    CartoonSubtype,
+    Media,
+    MediaCategory,
+    MediaSource,
+    MediaType,
+    WatchedStatus,
+)
 from app.schemas import CandidateResponse, MediaResponse
 from app.services.openai_client import (
     classify_media,
@@ -68,7 +75,9 @@ async def resolve(
             poster_url=c.get("poster_url"),
             genres=c.get("genres", []),
             rating=c.get("rating"),
-            disambiguation_question=disambiguation_question if len(candidates) > 1 else None,
+            disambiguation_question=disambiguation_question
+            if len(candidates) > 1
+            else None,
         )
         for c in candidates[:5]
     ]
@@ -83,7 +92,9 @@ async def resolve_screenshot(
     extracted = await extract_from_screenshot(image_bytes)
     title = extracted.get("title", "")
     if not title:
-        raise HTTPException(status_code=422, detail="Could not extract title from screenshot")
+        raise HTTPException(
+            status_code=422, detail="Could not extract title from screenshot"
+        )
 
     candidates = await search_multi(title, language="ru-RU")
     if not candidates:
@@ -121,7 +132,9 @@ async def confirm(
     if not details.get("description"):
         details_en = await get_details(body.tmdb_id, body.media_type, language="en-US")
         if details_en.get("description"):
-            details["description"] = await translate_to_russian(details_en["description"])
+            details["description"] = await translate_to_russian(
+                details_en["description"]
+            )
         details["title"] = details.get("title") or details_en.get("title", "")
 
     # R-12: derive MediaType from category, not TMDB media_type

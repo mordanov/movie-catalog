@@ -28,7 +28,9 @@ class WhitelistMiddleware(BaseMiddleware):
         if allowed is None:
             try:
                 async with httpx.AsyncClient() as client:
-                    resp = await client.get(f"{self._backend_url}/api/bot/users/{tid}", timeout=5)
+                    resp = await client.get(
+                        f"{self._backend_url}/api/bot/users/{tid}", timeout=5
+                    )
                 allowed = resp.status_code == 200
             except Exception:
                 allowed = False

@@ -3,7 +3,13 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from app.models import CartoonSubtype, MediaCategory, MediaSource, MediaType, WatchedStatus
+from app.models import (
+    CartoonSubtype,
+    MediaCategory,
+    MediaSource,
+    MediaType,
+    WatchedStatus,
+)
 
 
 class MediaCreate(BaseModel):

@@ -16,9 +16,9 @@ class Settings(BaseSettings):
     minio_bucket: str = "posters"
 
     web_user_1_login: str = ""
-    web_user_1_password_hash: str = ""
+    web_user_1_password: str = ""
     web_user_2_login: str = ""
-    web_user_2_password_hash: str = ""
+    web_user_2_password: str = ""
 
     jwt_secret: str = "change-me"
     jwt_expire_hours: int = 72

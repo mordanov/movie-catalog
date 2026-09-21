@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   postgres:
-    image: postgres:16
+    image: postgres:18
     restart: unless-stopped
     environment:
       POSTGRES_DB: moviecatalog
@@ -43,9 +43,9 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${MINIO_BUCKET:-posters}
       WEB_USER_1_LOGIN: ${WEB_USER_1_LOGIN:?required}
-      WEB_USER_1_PASSWORD_HASH: ${WEB_USER_1_PASSWORD_HASH:?required}
+      WEB_USER_1_PASSWORD: ${WEB_USER_1_PASSWORD:?required}
       WEB_USER_2_LOGIN: ${WEB_USER_2_LOGIN:-}
-      WEB_USER_2_PASSWORD_HASH: ${WEB_USER_2_PASSWORD_HASH:-}
+      WEB_USER_2_PASSWORD: ${WEB_USER_2_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET:?required}
       JWT_EXPIRE_HOURS: ${JWT_EXPIRE_HOURS:-72}
       BOT_SECRET: ${BOT_SECRET:?required}

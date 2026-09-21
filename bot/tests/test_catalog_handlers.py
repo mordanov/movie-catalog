@@ -1,5 +1,5 @@
 """Tests for /list, /find, /delete, /edit, /watched handlers."""
-import json
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -16,11 +16,19 @@ def _mock_resp(status_code: int, body):
 # list_ handler
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_cmd_list_returns_catalog():
-    from bot.handlers.list_ import cmd_list, _format_list
+    from bot.handlers.list_ import cmd_list
 
-    items = [{"title": "Toy Story", "title_ru": "История игрушек", "year": 1995, "watched_status": "watched"}]
+    items = [
+        {
+            "title": "Toy Story",
+            "title_ru": "История игрушек",
+            "year": 1995,
+            "watched_status": "watched",
+        }
+    ]
     fake_resp = _mock_resp(200, {"items": items, "total": 1})
 
     message = MagicMock()
@@ -44,7 +52,11 @@ async def test_cmd_list_error():
     message.text = "/list"
     message.answer = AsyncMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=_mock_resp(500, {})):
+    with patch(
+        "httpx.AsyncClient.get",
+        new_callable=AsyncMock,
+        return_value=_mock_resp(500, {}),
+    ):
         await cmd_list(message)
 
     text = message.answer.call_args[0][0]
@@ -69,12 +81,23 @@ async def test_cmd_find_no_query():
 async def test_cmd_find_results():
     from bot.handlers.list_ import cmd_find
 
-    items = [{"title": "Toy Story", "title_ru": None, "year": 1995, "watched_status": "not_watched"}]
+    items = [
+        {
+            "title": "Toy Story",
+            "title_ru": None,
+            "year": 1995,
+            "watched_status": "not_watched",
+        }
+    ]
     message = MagicMock()
     message.text = "/find Toy"
     message.answer = AsyncMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=_mock_resp(200, {"items": items, "total": 1})):
+    with patch(
+        "httpx.AsyncClient.get",
+        new_callable=AsyncMock,
+        return_value=_mock_resp(200, {"items": items, "total": 1}),
+    ):
         await cmd_find(message)
 
     text = message.answer.call_args[0][0]
@@ -89,7 +112,11 @@ async def test_cmd_find_empty():
     message.text = "/find xyznotfound"
     message.answer = AsyncMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=_mock_resp(200, {"items": [], "total": 0})):
+    with patch(
+        "httpx.AsyncClient.get",
+        new_callable=AsyncMock,
+        return_value=_mock_resp(200, {"items": [], "total": 0}),
+    ):
         await cmd_find(message)
 
     text = message.answer.call_args[0][0]
@@ -99,6 +126,7 @@ async def test_cmd_find_empty():
 # ---------------------------------------------------------------------------
 # manage handler — delete
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_cmd_delete_no_arg():
@@ -127,7 +155,11 @@ async def test_cmd_delete_single_match():
     state.set_state = AsyncMock()
     state.update_data = AsyncMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=_mock_resp(200, {"items": items, "total": 1})):
+    with patch(
+        "httpx.AsyncClient.get",
+        new_callable=AsyncMock,
+        return_value=_mock_resp(200, {"items": items, "total": 1}),
+    ):
         await cmd_delete(message, state)
 
     state.set_state.assert_awaited_once()
@@ -149,7 +181,11 @@ async def test_on_delete_confirm_success():
     state.get_data = AsyncMock(return_value={"media_id": "abc", "title": "Toy Story"})
     state.clear = AsyncMock()
 
-    with patch("httpx.AsyncClient.delete", new_callable=AsyncMock, return_value=_mock_resp(204, None)):
+    with patch(
+        "httpx.AsyncClient.delete",
+        new_callable=AsyncMock,
+        return_value=_mock_resp(204, None),
+    ):
         await on_delete_confirm(callback, state)
 
     text = callback.message.edit_text.call_args[0][0]
@@ -160,6 +196,7 @@ async def test_on_delete_confirm_success():
 # ---------------------------------------------------------------------------
 # status handler
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_cmd_watched_sets_status():
@@ -173,16 +210,14 @@ async def test_cmd_watched_sets_status():
     search_resp = _mock_resp(200, {"items": items})
     patch_resp = _mock_resp(200, {"id": "abc"})
 
-    call_count = 0
-
-    async def mock_get(*a, **kw):
-        return search_resp
-
-    async def mock_patch(*a, **kw):
-        return patch_resp
-
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=search_resp), \
-         patch("httpx.AsyncClient.patch", new_callable=AsyncMock, return_value=patch_resp):
+    with (
+        patch(
+            "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=search_resp
+        ),
+        patch(
+            "httpx.AsyncClient.patch", new_callable=AsyncMock, return_value=patch_resp
+        ),
+    ):
         await cmd_watched(message)
 
     text = message.answer.call_args[0][0]
@@ -200,8 +235,18 @@ async def test_cmd_unwatched_no_arg():
     message.text = "/unwatched"
     message.answer = AsyncMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=_mock_resp(200, {"items": [item]})), \
-         patch("httpx.AsyncClient.patch", new_callable=AsyncMock, return_value=_mock_resp(200, item)):
+    with (
+        patch(
+            "httpx.AsyncClient.get",
+            new_callable=AsyncMock,
+            return_value=_mock_resp(200, {"items": [item]}),
+        ),
+        patch(
+            "httpx.AsyncClient.patch",
+            new_callable=AsyncMock,
+            return_value=_mock_resp(200, item),
+        ),
+    ):
         await cmd_unwatched(message)
 
     text = message.answer.call_args[0][0]
@@ -211,6 +256,7 @@ async def test_cmd_unwatched_no_arg():
 # ---------------------------------------------------------------------------
 # list_ format helper
 # ---------------------------------------------------------------------------
+
 
 def test_format_list_includes_emoji():
     from bot.handlers.list_ import _format_list

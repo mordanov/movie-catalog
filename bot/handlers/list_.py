@@ -1,7 +1,12 @@
 import httpx
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
 
 from bot.config import settings
 
@@ -12,13 +17,23 @@ _HEADERS = {"X-Bot-Secret": settings.bot_secret}
 STATUS_EMOJI = {"not_watched": "👀", "watching": "▶️", "watched": "✅"}
 
 
-def _pagination_keyboard(page: int, total: int, page_size: int, prefix: str) -> InlineKeyboardMarkup | None:
+def _pagination_keyboard(
+    page: int, total: int, page_size: int, prefix: str
+) -> InlineKeyboardMarkup | None:
     buttons = []
     row = []
     if page > 1:
-        row.append(InlineKeyboardButton(text="◀ Назад", callback_data=f"{prefix}:page:{page - 1}"))
+        row.append(
+            InlineKeyboardButton(
+                text="◀ Назад", callback_data=f"{prefix}:page:{page - 1}"
+            )
+        )
     if page * page_size < total:
-        row.append(InlineKeyboardButton(text="Вперёд ▶", callback_data=f"{prefix}:page:{page + 1}"))
+        row.append(
+            InlineKeyboardButton(
+                text="Вперёд ▶", callback_data=f"{prefix}:page:{page + 1}"
+            )
+        )
     if row:
         buttons.append(row)
     return InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None
@@ -44,7 +59,9 @@ async def cmd_list(message: Message):
     prefix = f"list:{params.get('category', '')}"
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/media", params=params, headers=_HEADERS)
+        resp = await client.get(
+            f"{_BACKEND}/api/media", params=params, headers=_HEADERS
+        )
 
     if resp.status_code != 200:
         await message.answer(f"Ошибка: {resp.status_code}")
@@ -69,7 +86,9 @@ async def on_list_page(callback: CallbackQuery):
     prefix = f"list:{category}"
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/media", params=params, headers=_HEADERS)
+        resp = await client.get(
+            f"{_BACKEND}/api/media", params=params, headers=_HEADERS
+        )
 
     if resp.status_code != 200:
         await callback.message.edit_text(f"Ошибка: {resp.status_code}")

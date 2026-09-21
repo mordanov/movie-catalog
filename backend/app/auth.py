@@ -13,14 +13,18 @@ def verify_password(plain: str, hashed: str) -> bool:
     return _pwd_ctx.verify(plain, hashed)
 
 
+def _to_hash(password: str) -> str:
+    return password if password.startswith("$2") else _pwd_ctx.hash(password)
+
+
 def _users() -> dict[str, str]:
     """Return {login: hash} for all configured web users."""
     s = get_settings()
     users: dict[str, str] = {}
-    if s.web_user_1_login and s.web_user_1_password_hash:
-        users[s.web_user_1_login] = s.web_user_1_password_hash
-    if s.web_user_2_login and s.web_user_2_password_hash:
-        users[s.web_user_2_login] = s.web_user_2_password_hash
+    if s.web_user_1_login and s.web_user_1_password:
+        users[s.web_user_1_login] = _to_hash(s.web_user_1_password)
+    if s.web_user_2_login and s.web_user_2_password:
+        users[s.web_user_2_login] = _to_hash(s.web_user_2_password)
     return users
 
 
@@ -48,12 +52,16 @@ def get_current_user(
     if x_bot_secret and s.bot_secret and x_bot_secret == s.bot_secret:
         return "bot"
     if not access_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+        )
     try:
         payload = jwt.decode(access_token, s.jwt_secret, algorithms=["HS256"])
         login: str = payload.get("sub", "")
         if not login:
             raise ValueError
     except (JWTError, ValueError):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
     return login

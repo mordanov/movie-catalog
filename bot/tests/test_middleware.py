@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from cachetools import TTLCache
@@ -26,7 +25,9 @@ async def test_whitelist_middleware_allows_known_user():
     mock_response = MagicMock()
     mock_response.status_code = 200
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response
+    ):
         # Simulate a message event
         event = MagicMock()
         event.from_user = MagicMock()
@@ -57,7 +58,9 @@ async def test_whitelist_middleware_blocks_unknown_user():
     mock_response = MagicMock()
     mock_response.status_code = 404
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response
+    ):
         event = MagicMock()
         event.from_user = MagicMock()
         event.from_user.id = 99999

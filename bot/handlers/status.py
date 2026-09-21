@@ -46,7 +46,11 @@ async def _set_status(message: Message, status: str):
 
     if resp.status_code == 200:
         title = m.get("title_ru") or m.get("title")
-        labels = {"not_watched": "не просмотрено", "watching": "смотрим", "watched": "просмотрено"}
+        labels = {
+            "not_watched": "не просмотрено",
+            "watching": "смотрим",
+            "watched": "просмотрено",
+        }
         await message.answer(f"✅ <b>{title}</b> — {labels[status]}", parse_mode="HTML")
     else:
         await message.answer(f"Ошибка: {resp.status_code}")

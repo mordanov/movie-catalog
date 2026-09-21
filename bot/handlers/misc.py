@@ -64,15 +64,21 @@ async def cmd_stats(message: Message):
     if by_cat:
         lines.append("\n<b>По категориям:</b>")
         labels = {
-            "cartoon": "Мультфильмы", "family_movie": "Семейные фильмы",
-            "adult_movie": "Взрослые фильмы", "kids_series": "Детские сериалы",
+            "cartoon": "Мультфильмы",
+            "family_movie": "Семейные фильмы",
+            "adult_movie": "Взрослые фильмы",
+            "kids_series": "Детские сериалы",
             "adult_series": "Взрослые сериалы",
         }
         for k, v in by_cat.items():
             lines.append(f"  {labels.get(k, k)}: {v}")
     if by_status:
         lines.append("\n<b>По статусу:</b>")
-        slabels = {"not_watched": "Не смотрели", "watching": "Смотрим", "watched": "Просмотрено"}
+        slabels = {
+            "not_watched": "Не смотрели",
+            "watching": "Смотрим",
+            "watched": "Просмотрено",
+        }
         for k, v in by_status.items():
             lines.append(f"  {slabels.get(k, k)}: {v}")
 
@@ -87,7 +93,9 @@ async def cmd_random(message: Message):
         params["category"] = args[1].strip()
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/media/random", params=params, headers=_HEADERS)
+        resp = await client.get(
+            f"{_BACKEND}/api/media/random", params=params, headers=_HEADERS
+        )
 
     if resp.status_code == 404:
         await message.answer("Ничего не найдено в каталоге.")
@@ -99,7 +107,9 @@ async def cmd_random(message: Message):
     m = resp.json()
     title = m.get("title_ru") or m.get("title", "")
     year = m.get("year", "")
-    status_emoji = {"not_watched": "👀", "watching": "▶️", "watched": "✅"}.get(m.get("watched_status", ""), "")
+    status_emoji = {"not_watched": "👀", "watching": "▶️", "watched": "✅"}.get(
+        m.get("watched_status", ""), ""
+    )
     await message.answer(f"{status_emoji} <b>{title}</b> ({year})", parse_mode="HTML")
 
 

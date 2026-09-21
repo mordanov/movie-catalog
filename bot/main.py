@@ -39,9 +39,15 @@ async def main() -> None:
     dp.include_router(users.router)
 
     from bot.handlers import add as add_handler
+
     dp.include_router(add_handler.router)
 
-    from bot.handlers import list_ as list_handler, manage as manage_handler, status as status_handler
+    from bot.handlers import (
+        list_ as list_handler,
+        manage as manage_handler,
+        status as status_handler,
+    )
+
     dp.include_router(list_handler.router)
     dp.include_router(manage_handler.router)
     dp.include_router(status_handler.router)

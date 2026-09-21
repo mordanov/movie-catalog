@@ -26,7 +26,11 @@ async def cmd_adduser(message: Message):
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{_BACKEND}/api/bot/users",
-            json={"telegram_id": telegram_id, "display_name": display_name, "added_by_telegram_id": message.from_user.id},
+            json={
+                "telegram_id": telegram_id,
+                "display_name": display_name,
+                "added_by_telegram_id": message.from_user.id,
+            },
         )
 
     if resp.status_code == 201:
@@ -73,5 +77,7 @@ async def cmd_users(message: Message):
         await message.answer("Список пользователей пуст.")
         return
 
-    lines = [f"• {u['telegram_id']} — {u.get('display_name') or 'без имени'}" for u in users]
+    lines = [
+        f"• {u['telegram_id']} — {u.get('display_name') or 'без имени'}" for u in users
+    ]
     await message.answer("Пользователи:\n" + "\n".join(lines))

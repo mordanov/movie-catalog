@@ -23,15 +23,19 @@ def _get_client() -> Minio:
         try:
             if not _client.bucket_exists(s.minio_bucket):
                 _client.make_bucket(s.minio_bucket)
-            policy = json.dumps({
-                "Version": "2012-10-17",
-                "Statement": [{
-                    "Effect": "Allow",
-                    "Principal": {"AWS": ["*"]},
-                    "Action": ["s3:GetObject"],
-                    "Resource": [f"arn:aws:s3:::{s.minio_bucket}/*"],
-                }],
-            })
+            policy = json.dumps(
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"AWS": ["*"]},
+                            "Action": ["s3:GetObject"],
+                            "Resource": [f"arn:aws:s3:::{s.minio_bucket}/*"],
+                        }
+                    ],
+                }
+            )
             _client.set_bucket_policy(s.minio_bucket, policy)
         except S3Error:
             pass

@@ -33,14 +33,22 @@ SUBTYPE_LABELS = {
 }
 
 
-def _candidate_keyboard(candidates: list[dict], show_other: bool = True) -> InlineKeyboardMarkup:
+def _candidate_keyboard(
+    candidates: list[dict], show_other: bool = True
+) -> InlineKeyboardMarkup:
     buttons = []
     for i, c in enumerate(candidates):
         label = f"{c['title']} ({c.get('year') or '?'})"
-        buttons.append([InlineKeyboardButton(text=label, callback_data=f"candidate:{i}")])
+        buttons.append(
+            [InlineKeyboardButton(text=label, callback_data=f"candidate:{i}")]
+        )
     if show_other:
-        buttons.append([InlineKeyboardButton(text="Это другое", callback_data="candidate:other")])
-    buttons.append([InlineKeyboardButton(text="Отмена", callback_data="candidate:cancel")])
+        buttons.append(
+            [InlineKeyboardButton(text="Это другое", callback_data="candidate:other")]
+        )
+    buttons.append(
+        [InlineKeyboardButton(text="Отмена", callback_data="candidate:cancel")]
+    )
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
@@ -62,15 +70,19 @@ def _subtype_keyboard() -> InlineKeyboardMarkup:
 
 
 def _confirm_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="✅ Добавить", callback_data="confirm:yes"),
-            InlineKeyboardButton(text="❌ Отмена", callback_data="confirm:no"),
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ Добавить", callback_data="confirm:yes"),
+                InlineKeyboardButton(text="❌ Отмена", callback_data="confirm:no"),
+            ]
         ]
-    ])
+    )
 
 
-async def _resolve_and_show(message: Message, state: FSMContext, query: str = None, image_bytes: bytes = None):
+async def _resolve_and_show(
+    message: Message, state: FSMContext, query: str = None, image_bytes: bytes = None
+):
     """Call backend resolve and display candidates."""
     await message.answer("🔍 Ищу в TMDB...")
 
@@ -83,7 +95,12 @@ async def _resolve_and_show(message: Message, state: FSMContext, query: str = No
                 timeout=30,
             )
         else:
-            resp = await client.post(f"{_BACKEND}/api/resolve", json={"query": query}, headers=_HEADERS, timeout=15)
+            resp = await client.post(
+                f"{_BACKEND}/api/resolve",
+                json={"query": query},
+                headers=_HEADERS,
+                timeout=15,
+            )
 
     if resp.status_code != 200:
         await message.answer(f"Ошибка поиска: {resp.status_code}")
@@ -108,9 +125,14 @@ async def _resolve_and_show(message: Message, state: FSMContext, query: str = No
         await message.answer(text, reply_markup=_confirm_keyboard(), parse_mode="HTML")
         await state.update_data(selected_index=0)
     else:
-        dq = candidates[0].get("disambiguation_question") or "Какой из вариантов вы имели в виду?"
+        dq = (
+            candidates[0].get("disambiguation_question")
+            or "Какой из вариантов вы имели в виду?"
+        )
         text = f"{dq}\n"
-        await message.answer(text, reply_markup=_candidate_keyboard(candidates[:5]), parse_mode="HTML")
+        await message.answer(
+            text, reply_markup=_candidate_keyboard(candidates[:5]), parse_mode="HTML"
+        )
 
 
 # /add command
@@ -149,7 +171,9 @@ async def receive_photo(message: Message, state: FSMContext):
     photo = message.photo[-1]  # largest size
     file = await message.bot.get_file(photo.file_id)
     downloaded = await message.bot.download_file(file.file_path)
-    image_bytes = downloaded.read() if hasattr(downloaded, "read") else bytes(downloaded)
+    image_bytes = (
+        downloaded.read() if hasattr(downloaded, "read") else bytes(downloaded)
+    )
     await _resolve_and_show(message, state, image_bytes=image_bytes)
 
 
@@ -181,7 +205,9 @@ async def on_candidate_select(callback: CallbackQuery, state: FSMContext):
         f"{selected.get('description', '')[:200]}\n\n"
         f"Добавить в каталог?"
     )
-    await callback.message.edit_text(text, reply_markup=_confirm_keyboard(), parse_mode="HTML")
+    await callback.message.edit_text(
+        text, reply_markup=_confirm_keyboard(), parse_mode="HTML"
+    )
 
 
 # Confirm add (single candidate path or after candidate selection)
@@ -196,8 +222,12 @@ async def on_confirm_yes(callback: CallbackQuery, state: FSMContext):
     # Check if category is already set (single-candidate pre-classification)
     category = selected.get("category")
     if category:
-        await state.update_data(selected_category=category, selected_subtype=selected.get("cartoon_subtype"))
-        await _do_confirm(callback.message, state, selected, category, selected.get("cartoon_subtype"))
+        await state.update_data(
+            selected_category=category, selected_subtype=selected.get("cartoon_subtype")
+        )
+        await _do_confirm(
+            callback.message, state, selected, category, selected.get("cartoon_subtype")
+        )
     else:
         await state.set_state(AddMedia.confirming_category)
         await callback.message.edit_text(
@@ -223,7 +253,9 @@ async def on_category_select(callback: CallbackQuery, state: FSMContext):
 
     if category == "cartoon":
         await state.set_state(AddMedia.confirming_add)
-        await callback.message.edit_text("Выберите тип мультфильма:", reply_markup=_subtype_keyboard())
+        await callback.message.edit_text(
+            "Выберите тип мультфильма:", reply_markup=_subtype_keyboard()
+        )
     else:
         data = await state.get_data()
         candidates = data["candidates"]
@@ -243,7 +275,13 @@ async def on_subtype_select(callback: CallbackQuery, state: FSMContext):
     await _do_confirm(callback.message, state, selected, category, subtype)
 
 
-async def _do_confirm(message, state: FSMContext, candidate: dict, category: str, cartoon_subtype: str | None):
+async def _do_confirm(
+    message,
+    state: FSMContext,
+    candidate: dict,
+    category: str,
+    cartoon_subtype: str | None,
+):
     """POST /api/media/confirm and show result."""
     await state.clear()
     async with httpx.AsyncClient() as client:
@@ -264,10 +302,14 @@ async def _do_confirm(message, state: FSMContext, candidate: dict, category: str
         media = resp.json()
         title = media.get("title_ru") or media.get("title", "")
         year = media.get("year", "")
-        cat_label = CATEGORY_LABELS.get(media.get("category", ""), media.get("category", ""))
+        cat_label = CATEGORY_LABELS.get(
+            media.get("category", ""), media.get("category", "")
+        )
         await message.edit_text(
             f"✅ <b>{title}</b> ({year}) добавлен!\nКатегория: {cat_label}",
             parse_mode="HTML",
         )
     else:
-        await message.edit_text(f"Ошибка добавления: {resp.status_code}\n{resp.text[:200]}")
+        await message.edit_text(
+            f"Ошибка добавления: {resp.status_code}\n{resp.text[:200]}"
+        )

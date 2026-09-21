@@ -7,7 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import get_current_user
 from app.database import get_db
 from app.models import Media, MediaCategory, MediaType, WatchedStatus
-from app.schemas import MediaCreate, MediaListResponse, MediaResponse, MediaUpdate, StatsResponse
+from app.schemas import (
+    MediaCreate,
+    MediaListResponse,
+    MediaResponse,
+    MediaUpdate,
+    StatsResponse,
+)
 
 router = APIRouter(prefix="/api/media", tags=["media"])
 stats_router = APIRouter(prefix="/api", tags=["stats"])
@@ -38,7 +44,11 @@ async def list_media(
     total_q = select(func.count()).select_from(q.subquery())
     total = (await db.execute(total_q)).scalar_one()
 
-    q = q.order_by(Media.added_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    q = (
+        q.order_by(Media.added_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     items = (await db.execute(q)).scalars().all()
     return MediaListResponse(items=items, total=total, page=page, page_size=page_size)
 
@@ -74,18 +84,31 @@ async def stats(
     total = (await db.execute(select(func.count(Media.id)))).scalar_one()
 
     by_type: dict[str, int] = {}
-    for row in (await db.execute(select(Media.type, func.count()).group_by(Media.type))).all():
+    for row in (
+        await db.execute(select(Media.type, func.count()).group_by(Media.type))
+    ).all():
         by_type[row[0].value] = row[1]
 
     by_category: dict[str, int] = {}
-    for row in (await db.execute(select(Media.category, func.count()).group_by(Media.category))).all():
+    for row in (
+        await db.execute(select(Media.category, func.count()).group_by(Media.category))
+    ).all():
         by_category[row[0].value] = row[1]
 
     by_watched: dict[str, int] = {}
-    for row in (await db.execute(select(Media.watched_status, func.count()).group_by(Media.watched_status))).all():
+    for row in (
+        await db.execute(
+            select(Media.watched_status, func.count()).group_by(Media.watched_status)
+        )
+    ).all():
         by_watched[row[0].value] = row[1]
 
-    return StatsResponse(total=total, by_type=by_type, by_category=by_category, by_watched_status=by_watched)
+    return StatsResponse(
+        total=total,
+        by_type=by_type,
+        by_category=by_category,
+        by_watched_status=by_watched,
+    )
 
 
 @router.post("", response_model=MediaResponse, status_code=status.HTTP_201_CREATED)

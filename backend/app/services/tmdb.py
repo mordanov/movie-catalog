@@ -16,7 +16,11 @@ async def search_multi(query: str, language: str = "ru-RU") -> list[dict[str, An
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{_TMDB_BASE}/search/multi",
-            params={"api_key": get_settings().tmdb_api_key, "query": query, "language": language},
+            params={
+                "api_key": get_settings().tmdb_api_key,
+                "query": query,
+                "language": language,
+            },
         )
         resp.raise_for_status()
     results = []
@@ -27,26 +31,34 @@ async def search_multi(query: str, language: str = "ru-RU") -> list[dict[str, An
         title = r.get("title") or r.get("name", "")
         release = r.get("release_date") or r.get("first_air_date", "")
         year = int(release[:4]) if release else None
-        results.append({
-            "tmdb_id": r["id"],
-            "media_type": media_type,
-            "title": title,
-            "year": year,
-            "description": r.get("overview"),
-            "poster_url": _poster(r.get("poster_path")),
-            "genres": r.get("genre_ids", []),  # IDs only at search level
-            "rating": r.get("vote_average"),
-        })
+        results.append(
+            {
+                "tmdb_id": r["id"],
+                "media_type": media_type,
+                "title": title,
+                "year": year,
+                "description": r.get("overview"),
+                "poster_url": _poster(r.get("poster_path")),
+                "genres": r.get("genre_ids", []),  # IDs only at search level
+                "rating": r.get("vote_average"),
+            }
+        )
     return results
 
 
-async def get_details(tmdb_id: int, media_type: str, language: str = "ru-RU") -> dict[str, Any]:
+async def get_details(
+    tmdb_id: int, media_type: str, language: str = "ru-RU"
+) -> dict[str, Any]:
     """media_type: 'movie' or 'tv'"""
     endpoint = "movie" if media_type == "movie" else "tv"
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{_TMDB_BASE}/{endpoint}/{tmdb_id}",
-            params={"api_key": get_settings().tmdb_api_key, "language": language, "append_to_response": "credits"},
+            params={
+                "api_key": get_settings().tmdb_api_key,
+                "language": language,
+                "append_to_response": "credits",
+            },
         )
         resp.raise_for_status()
     d = resp.json()
@@ -55,7 +67,9 @@ async def get_details(tmdb_id: int, media_type: str, language: str = "ru-RU") ->
     year = int(release[:4]) if release else None
     genres = [g["name"] for g in d.get("genres", [])]
     actors = [c["name"] for c in d.get("credits", {}).get("cast", [])[:10]]
-    origin = d.get("origin_country", [d.get("production_countries", [{}])[0].get("iso_3166_1", "")])
+    origin = d.get(
+        "origin_country", [d.get("production_countries", [{}])[0].get("iso_3166_1", "")]
+    )
     return {
         "tmdb_id": tmdb_id,
         "media_type": media_type,

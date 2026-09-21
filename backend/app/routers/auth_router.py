@@ -15,7 +15,9 @@ class LoginRequest(BaseModel):
 async def login(body: LoginRequest, response: Response):
     login_str = authenticate_user(body.login, body.password)
     if not login_str:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
     token = create_access_token(login_str)
     response.set_cookie(
         key="access_token",

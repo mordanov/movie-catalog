@@ -31,7 +31,10 @@ async def translate_to_russian(text: str) -> str:
     resp = await _ensure_client().chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Translate the following movie description to Russian. Return only the translation."},
+            {
+                "role": "system",
+                "content": "Translate the following movie description to Russian. Return only the translation.",
+            },
             {"role": "user", "content": text},
         ],
     )
@@ -63,6 +66,7 @@ async def classify_media(
 async def extract_from_screenshot(image_bytes: bytes) -> dict[str, Any]:
     """Returns {"title": str, "year_hint": int|None}"""
     import base64
+
     b64 = base64.b64encode(image_bytes).decode()
     resp = await _ensure_client().chat.completions.create(
         model="gpt-4o",
@@ -72,7 +76,10 @@ async def extract_from_screenshot(image_bytes: bytes) -> dict[str, Any]:
                 "role": "user",
                 "content": [
                     {"type": "text", "text": "What movie or series is shown?"},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                    },
                 ],
             },
         ],
