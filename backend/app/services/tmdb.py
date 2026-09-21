@@ -39,7 +39,7 @@ async def search_multi(query: str, language: str = "ru-RU") -> list[dict[str, An
                 "year": year,
                 "description": r.get("overview"),
                 "poster_url": _poster(r.get("poster_path")),
-                "genres": r.get("genre_ids", []),  # IDs only at search level
+                "genres": [],  # genre_ids (ints) at search level; names resolved in get_details
                 "rating": r.get("vote_average"),
             }
         )
