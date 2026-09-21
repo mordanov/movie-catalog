@@ -13,15 +13,17 @@ from bot.middlewares.auth import WhitelistMiddleware
 logging.basicConfig(level=logging.INFO)
 
 
-async def bootstrap_admin(backend_url: str, admin_id: int) -> None:
+async def bootstrap_admin(backend_url: str, admin_id: int, bot_secret: str) -> None:
     """If bot_users table is empty, add the initial admin."""
+    headers = {"X-Bot-Secret": bot_secret}
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.get(f"{backend_url}/api/bot/users")
+            resp = await client.get(f"{backend_url}/api/bot/users", headers=headers)
             if resp.status_code == 200 and len(resp.json()) == 0:
                 await client.post(
                     f"{backend_url}/api/bot/users",
                     json={"telegram_id": admin_id, "display_name": "Admin"},
+                    headers=headers,
                 )
                 logging.info("Bootstrapped initial admin: %s", admin_id)
         except Exception as e:
@@ -53,7 +55,9 @@ async def main() -> None:
     dp.include_router(manage_handler.router)
     dp.include_router(status_handler.router)
 
-    await bootstrap_admin(settings.backend_url, settings.initial_admin_telegram_id)
+    await bootstrap_admin(
+        settings.backend_url, settings.initial_admin_telegram_id, settings.bot_secret
+    )
 
     user_commands = [
         BotCommand(command="add", description="Добавить фильм / мультфильм / сериал"),
@@ -76,10 +80,15 @@ async def main() -> None:
     ]
 
     await bot.set_my_commands(user_commands, scope=BotCommandScopeDefault())
-    await bot.set_my_commands(
-        admin_commands,
-        scope=BotCommandScopeChat(chat_id=settings.initial_admin_telegram_id),
-    )
+    try:
+        await bot.set_my_commands(
+            admin_commands,
+            scope=BotCommandScopeChat(chat_id=settings.initial_admin_telegram_id),
+        )
+    except Exception as e:
+        logging.warning(
+            "Could not set admin commands (start a chat with the bot first): %s", e
+        )
 
     logging.info("Bot starting...")
     await dp.start_polling(bot)
