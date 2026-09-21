@@ -1,61 +1,45 @@
-import io
-import json
-
 import httpx
-from minio import Minio
-from minio.error import S3Error
+from aiobotocore.session import get_session
+from botocore.config import Config
 
 from app.config import get_settings
 
-_client: Minio | None = None
-
-
-def _get_client() -> Minio:
-    global _client
-    if _client is None:
-        s = get_settings()
-        _client = Minio(
-            s.minio_endpoint,
-            access_key=s.minio_root_user,
-            secret_key=s.minio_root_password,
-            secure=False,
-        )
-        try:
-            if not _client.bucket_exists(s.minio_bucket):
-                _client.make_bucket(s.minio_bucket)
-            policy = json.dumps(
-                {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {"AWS": ["*"]},
-                            "Action": ["s3:GetObject"],
-                            "Resource": [f"arn:aws:s3:::{s.minio_bucket}/*"],
-                        }
-                    ],
-                }
-            )
-            _client.set_bucket_policy(s.minio_bucket, policy)
-        except S3Error:
-            pass
-    return _client
-
 
 async def upload_poster(url: str, filename: str) -> str:
-    """Download poster from URL and upload to MinIO. Returns internal URL."""
+    """Download poster from URL and upload to S3-compatible storage. Returns public URL."""
     async with httpx.AsyncClient() as http:
         resp = await http.get(url, follow_redirects=True)
         resp.raise_for_status()
 
     s = get_settings()
-    client = _get_client()
-    data = resp.content
-    client.put_object(
-        s.minio_bucket,
-        filename,
-        io.BytesIO(data),
-        length=len(data),
-        content_type="image/jpeg",
+    cfg = Config(
+        signature_version="s3v4",
+        s3={"addressing_style": "path" if s.s3_force_path_style else "virtual"},
     )
-    return f"/{s.minio_bucket}/{filename}"
+    session = get_session()
+    async with session.create_client(
+        "s3",
+        endpoint_url=s.s3_endpoint,
+        region_name=s.s3_region,
+        aws_access_key_id=s.s3_access_key,
+        aws_secret_access_key=s.s3_secret_key,
+        config=cfg,
+    ) as client:
+        try:
+            await client.create_bucket(Bucket=s.s3_bucket)
+        except client.exceptions.BucketAlreadyOwnedByYou:
+            pass
+        except Exception:
+            pass  # bucket may already exist or creation not needed (Hetzner pre-configured)
+
+        await client.put_object(
+            Bucket=s.s3_bucket,
+            Key=f"{s.s3_key_prefix}{filename}",
+            Body=resp.content,
+            ContentType="image/jpeg",
+            ACL="public-read",
+        )
+
+    if s.s3_public_url:
+        return f"{s.s3_public_url.rstrip('/')}/{filename}"
+    return f"/{s.s3_bucket}/{filename}"

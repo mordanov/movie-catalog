@@ -38,10 +38,13 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-catalog}:${POSTGRES_PASSWORD}@postgres:5432/moviecatalog
       OPENAI_API_KEY: ${OPENAI_API_KEY:?required}
       TMDB_API_KEY: ${TMDB_API_KEY:?required}
-      MINIO_ENDPOINT: minio:9000
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: ${MINIO_BUCKET:-posters}
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET: ${MINIO_BUCKET:-posters}
+      S3_FORCE_PATH_STYLE: "true"
+      S3_PUBLIC_URL: ""
       WEB_USER_1_LOGIN: ${WEB_USER_1_LOGIN:?required}
       WEB_USER_1_PASSWORD: ${WEB_USER_1_PASSWORD:?required}
       WEB_USER_2_LOGIN: ${WEB_USER_2_LOGIN:-}

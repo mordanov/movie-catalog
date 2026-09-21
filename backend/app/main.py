@@ -15,6 +15,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Movie Catalog API", lifespan=lifespan)
 
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok"}
+
+
 app.include_router(auth_router)
 app.include_router(bot_router)
 app.include_router(media_router)
