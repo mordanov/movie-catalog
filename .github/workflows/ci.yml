@@ -51,6 +51,8 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r backend/requirements.txt pytest pytest-asyncio
       - run: pytest backend/tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://catalog:changeme@localhost:5434/moviecatalog_test
 
   test-frontend:
     runs-on: ubuntu-latest
