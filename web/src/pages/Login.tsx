@@ -40,7 +40,7 @@ export default function Login() {
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border-border-theme shadow-sm focus:ring-primary focus:border-primary"
+              className="mt-1 block w-full rounded-md border-border-theme bg-surface text-text-base shadow-sm focus:ring-primary focus:border-primary"
             />
           </div>
           <div>
@@ -50,7 +50,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border-border-theme shadow-sm focus:ring-primary focus:border-primary"
+              className="mt-1 block w-full rounded-md border-border-theme bg-surface text-text-base shadow-sm focus:ring-primary focus:border-primary"
             />
           </div>
           <button
