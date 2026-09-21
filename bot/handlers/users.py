@@ -7,6 +7,7 @@ from bot.config import settings
 
 router = Router()
 _BACKEND = settings.backend_url
+_HEADERS = {"X-Bot-Secret": settings.bot_secret}
 
 
 @router.message(Command("adduser"))
@@ -31,6 +32,7 @@ async def cmd_adduser(message: Message):
                 "display_name": display_name,
                 "added_by_telegram_id": message.from_user.id,
             },
+            headers=_HEADERS,
         )
 
     if resp.status_code == 201:
@@ -55,7 +57,7 @@ async def cmd_removeuser(message: Message):
         return
 
     async with httpx.AsyncClient() as client:
-        resp = await client.delete(f"{_BACKEND}/api/bot/users/{telegram_id}")
+        resp = await client.delete(f"{_BACKEND}/api/bot/users/{telegram_id}", headers=_HEADERS)
 
     if resp.status_code == 204:
         await message.answer(f"Пользователь {telegram_id} удалён.")
@@ -66,7 +68,7 @@ async def cmd_removeuser(message: Message):
 @router.message(Command("users"))
 async def cmd_users(message: Message):
     async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{_BACKEND}/api/bot/users")
+        resp = await client.get(f"{_BACKEND}/api/bot/users", headers=_HEADERS)
 
     if resp.status_code != 200:
         await message.answer("Ошибка получения списка.")
