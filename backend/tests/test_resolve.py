@@ -1,10 +1,16 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from httpx import AsyncClient, ASGITransport
+import pytest
 from app.main import app
 from app.auth import get_current_user
 
-app.dependency_overrides[get_current_user] = lambda: "testuser"
+
+@pytest.fixture(autouse=True)
+def override_auth():
+    app.dependency_overrides[get_current_user] = lambda: "testuser"
+    yield
+    app.dependency_overrides.pop(get_current_user, None)
 
 FAKE_CANDIDATES = [
     {

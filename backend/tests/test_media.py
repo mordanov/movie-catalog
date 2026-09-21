@@ -36,7 +36,7 @@ async def client(db_session):
         # Set a fake auth cookie bypassing password check for these tests
         c.cookies.set("access_token", _make_test_token())
         yield c
-    app.dependency_overrides.clear()
+    app.dependency_overrides.pop(get_db, None)
 
 
 def _make_test_token():
