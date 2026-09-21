@@ -3,11 +3,16 @@ interface Filters {
   type: string;
   watched_status: string;
   search: string;
+  sort_by: string;
+  genre: string;
 }
 
 interface Props {
   filters: Filters;
   onChange: (filters: Filters) => void;
+  // Task 6 adds view-toggle controls; props accepted here so Catalog can wire them now
+  viewMode?: "grid" | "list";
+  onViewToggle?: (mode: "grid" | "list") => void;
 }
 
 const CATEGORIES = [

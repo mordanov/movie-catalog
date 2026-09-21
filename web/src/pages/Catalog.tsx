@@ -6,15 +6,20 @@ import FilterBar from "../components/FilterBar";
 import Pagination from "../components/Pagination";
 import AddMediaModal from "../components/AddMediaModal";
 import EditMediaModal from "../components/EditMediaModal";
+import MediaDetailModal from "../components/MediaDetailModal";
 
 interface Filters {
   category: string;
   type: string;
   watched_status: string;
   search: string;
+  sort_by: string;
+  genre: string;
 }
 
-const DEFAULT_FILTERS: Filters = { category: "", type: "", watched_status: "", search: "" };
+const DEFAULT_FILTERS: Filters = {
+  category: "", type: "", watched_status: "", search: "", sort_by: "added_at", genre: "",
+};
 const PAGE_SIZE = 24;
 
 export default function Catalog() {
@@ -26,6 +31,11 @@ export default function Catalog() {
   const [error, setError] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<Media | null>(null);
+  const [detailTarget, setDetailTarget] = useState<Media | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
+    try { return (localStorage.getItem("catalog_view") as "grid" | "list") ?? "grid"; }
+    catch { return "grid"; }
+  });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async (f: Filters, p: number) => {
@@ -52,10 +62,28 @@ export default function Catalog() {
     setPage(1);
   }
 
+  function handleViewToggle(mode: "grid" | "list") {
+    setViewMode(mode);
+    try { localStorage.setItem("catalog_view", mode); } catch { /* ignore */ }
+  }
+
+  async function handleStatusToggle(media: Media, nextStatus: string) {
+    try {
+      const updated = await api.media.update(media.id, { watched_status: nextStatus as Media["watched_status"] });
+      setItems((prev) => prev.map((m) => m.id === updated.id ? updated : m));
+      if (detailTarget?.id === updated.id) setDetailTarget(updated);
+    } catch { /* ignore */ }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <FilterBar filters={filters} onChange={handleFilterChange} />
+        <FilterBar
+          filters={filters}
+          onChange={handleFilterChange}
+          viewMode={viewMode}
+          onViewToggle={handleViewToggle}
+        />
         <button
           onClick={() => setShowAdd(true)}
           className="px-4 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary-hover"
@@ -72,10 +100,30 @@ export default function Catalog() {
         <div className="text-center text-muted py-12">Загрузка...</div>
       ) : items.length === 0 ? (
         <div className="text-center text-muted py-12">Ничего не найдено</div>
-      ) : (
+      ) : viewMode === "grid" ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {items.map((m) => (
-            <MediaCard key={m.id} media={m} onEdit={setEditTarget} />
+            <MediaCard
+              key={m.id}
+              media={m}
+              viewMode="grid"
+              onDetail={setDetailTarget}
+              onEdit={setEditTarget}
+              onStatusToggle={handleStatusToggle}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {items.map((m) => (
+            <MediaCard
+              key={m.id}
+              media={m}
+              viewMode="list"
+              onDetail={setDetailTarget}
+              onEdit={setEditTarget}
+              onStatusToggle={handleStatusToggle}
+            />
           ))}
         </div>
       )}
@@ -83,12 +131,8 @@ export default function Catalog() {
       <Pagination page={page} total={total} pageSize={PAGE_SIZE} onChange={setPage} />
 
       {showAdd && (
-        <AddMediaModal
-          onClose={() => setShowAdd(false)}
-          onAdded={() => load(filters, page)}
-        />
+        <AddMediaModal onClose={() => setShowAdd(false)} onAdded={() => load(filters, page)} />
       )}
-
       {editTarget && (
         <EditMediaModal
           media={editTarget}
@@ -101,6 +145,13 @@ export default function Catalog() {
             setItems((prev) => prev.filter((m) => m.id !== editTarget.id));
             setEditTarget(null);
           }}
+        />
+      )}
+      {detailTarget && (
+        <MediaDetailModal
+          media={detailTarget}
+          onClose={() => setDetailTarget(null)}
+          onEdit={() => { setEditTarget(detailTarget); setDetailTarget(null); }}
         />
       )}
     </div>
