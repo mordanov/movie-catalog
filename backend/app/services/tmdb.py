@@ -57,7 +57,7 @@ async def get_details(
             params={
                 "api_key": get_settings().tmdb_api_key,
                 "language": language,
-                "append_to_response": "credits",
+                "append_to_response": "credits,videos",
             },
         )
         resp.raise_for_status()
@@ -66,10 +66,15 @@ async def get_details(
     release = d.get("release_date") or d.get("first_air_date", "")
     year = int(release[:4]) if release else None
     genres = [g["name"] for g in d.get("genres", [])]
-    actors = [c["name"] for c in d.get("credits", {}).get("cast", [])[:10]]
+    actors = [c["name"] for c in d.get("credits", {}).get("cast", [])[:5]]
     origin = d.get(
         "origin_country", [d.get("production_countries", [{}])[0].get("iso_3166_1", "")]
     )
+    trailer_url: str | None = None
+    for v in d.get("videos", {}).get("results", []):
+        if v.get("type") == "Trailer" and v.get("site") == "YouTube":
+            trailer_url = f"https://www.youtube.com/watch?v={v['key']}"
+            break
     return {
         "tmdb_id": tmdb_id,
         "media_type": media_type,
@@ -82,4 +87,5 @@ async def get_details(
         "rating": d.get("vote_average"),
         "origin_country": origin,
         "external_ids": {"tmdb": tmdb_id},
+        "trailer_url": trailer_url,
     }

@@ -168,6 +168,7 @@ async def confirm(
         source=body.source,
         added_by=body.added_by,
         notes=body.notes,
+        trailer_url=details.get("trailer_url"),
     )
     db.add(media)
     await db.commit()

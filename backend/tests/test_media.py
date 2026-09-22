@@ -1,8 +1,9 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from app.main import app
+
 from app.database import get_db
+from app.main import app
 from app.models import Base
 
 TEST_DB = "postgresql+asyncpg://catalog:changeme@localhost:5434/moviecatalog_test"
@@ -40,8 +41,9 @@ async def client(db_session):
 
 
 def _make_test_token():
-    from app.auth import create_access_token
     import os
+
+    from app.auth import create_access_token
 
     os.environ.setdefault("JWT_SECRET", "testsecret")
     return create_access_token("testuser")
@@ -121,3 +123,102 @@ async def test_random(client):
     resp = await client.get("/api/media/random")
     assert resp.status_code == 200
     assert "id" in resp.json()
+
+
+@pytest.mark.asyncio
+async def test_list_media_sort_by_rating(client, db_session):
+    import uuid
+
+    from app.models import Media, MediaCategory, MediaSource, MediaType, WatchedStatus
+
+    for rating in [7.0, 9.0, 5.0]:
+        db_session.add(
+            Media(
+                id=uuid.uuid4(),
+                title=f"Movie {rating}",
+                type=MediaType.movie,
+                category=MediaCategory.adult_movie,
+                watched_status=WatchedStatus.not_watched,
+                source=MediaSource.web_ui,
+                rating_external=rating,
+                genres=[],
+                actors=[],
+                external_ids={},
+            )
+        )
+    await db_session.commit()
+
+    resp = await client.get("/api/media?sort_by=rating")
+    assert resp.status_code == 200
+    items = resp.json()["items"]
+    ratings = [i["rating_external"] for i in items if i["rating_external"] is not None]
+    assert ratings == sorted(ratings, reverse=True)
+
+
+@pytest.mark.asyncio
+async def test_list_media_genre_filter(client, db_session):
+    import uuid
+
+    from app.models import Media, MediaCategory, MediaSource, MediaType, WatchedStatus
+
+    db_session.add(
+        Media(
+            id=uuid.uuid4(),
+            title="Animation Movie",
+            type=MediaType.movie,
+            category=MediaCategory.adult_movie,
+            watched_status=WatchedStatus.not_watched,
+            source=MediaSource.web_ui,
+            genres=["Animation", "Comedy"],
+            actors=[],
+            external_ids={},
+        )
+    )
+    db_session.add(
+        Media(
+            id=uuid.uuid4(),
+            title="Drama Movie",
+            type=MediaType.movie,
+            category=MediaCategory.adult_movie,
+            watched_status=WatchedStatus.not_watched,
+            source=MediaSource.web_ui,
+            genres=["Drama"],
+            actors=[],
+            external_ids={},
+        )
+    )
+    await db_session.commit()
+
+    resp = await client.get("/api/media?genre=Animation")
+    assert resp.status_code == 200
+    titles = [i["title"] for i in resp.json()["items"]]
+    assert "Animation Movie" in titles
+    assert "Drama Movie" not in titles
+
+
+@pytest.mark.asyncio
+async def test_genres_endpoint(client, db_session):
+    import uuid
+
+    from app.models import Media, MediaCategory, MediaSource, MediaType, WatchedStatus
+
+    db_session.add(
+        Media(
+            id=uuid.uuid4(),
+            title="G1",
+            type=MediaType.movie,
+            category=MediaCategory.adult_movie,
+            watched_status=WatchedStatus.not_watched,
+            source=MediaSource.web_ui,
+            genres=["Sci-Fi", "Action"],
+            actors=[],
+            external_ids={},
+        )
+    )
+    await db_session.commit()
+
+    resp = await client.get("/api/genres")
+    assert resp.status_code == 200
+    genres = resp.json()["genres"]
+    assert "Sci-Fi" in genres
+    assert "Action" in genres

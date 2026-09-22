@@ -1,7 +1,8 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from pydantic import BaseModel
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_current_user
@@ -15,6 +16,11 @@ from app.schemas import (
     StatsResponse,
 )
 
+
+class GenresResponse(BaseModel):
+    genres: list[str]
+
+
 router = APIRouter(prefix="/api/media", tags=["media"])
 stats_router = APIRouter(prefix="/api", tags=["stats"])
 
@@ -27,6 +33,8 @@ async def list_media(
     type: MediaType | None = None,
     watched_status: WatchedStatus | None = None,
     search: str | None = None,
+    genre: str | None = None,
+    sort_by: str = Query("added_at", pattern="^(added_at|rating|year|title)$"),
     db: AsyncSession = Depends(get_db),
     _user: str = Depends(get_current_user),
 ):
@@ -40,15 +48,19 @@ async def list_media(
     if search:
         pattern = f"%{search}%"
         q = q.where(Media.title.ilike(pattern) | Media.title_ru.ilike(pattern))
+    if genre:
+        q = q.where(Media.genres.contains([genre]))
 
     total_q = select(func.count()).select_from(q.subquery())
     total = (await db.execute(total_q)).scalar_one()
 
-    q = (
-        q.order_by(Media.added_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
+    order_col = {
+        "added_at": Media.added_at.desc(),
+        "rating": Media.rating_external.desc().nulls_last(),
+        "year": Media.year.desc().nulls_last(),
+        "title": Media.title.asc(),
+    }[sort_by]
+    q = q.order_by(order_col).offset((page - 1) * page_size).limit(page_size)
     items = (await db.execute(q)).scalars().all()
     return MediaListResponse(items=items, total=total, page=page, page_size=page_size)
 
@@ -74,6 +86,17 @@ async def random_media(
     if not result:
         raise HTTPException(status_code=404, detail="No media found")
     return result
+
+
+@stats_router.get("/genres", response_model=GenresResponse)
+async def list_genres(
+    db: AsyncSession = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
+    result = await db.execute(
+        text("SELECT DISTINCT unnest(genres) AS g FROM media ORDER BY g")
+    )
+    return GenresResponse(genres=[row[0] for row in result.all()])
 
 
 @stats_router.get("/stats", response_model=StatsResponse)

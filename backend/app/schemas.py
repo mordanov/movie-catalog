@@ -29,6 +29,7 @@ class MediaCreate(BaseModel):
     source: MediaSource
     added_by: str | None = None
     notes: str | None = None
+    trailer_url: str | None = None
 
 
 class MediaUpdate(BaseModel):
@@ -46,6 +47,7 @@ class MediaUpdate(BaseModel):
     watched_status: WatchedStatus | None = None
     watched_at: datetime | None = None
     notes: str | None = None
+    trailer_url: str | None = None
 
 
 class MediaResponse(BaseModel):
@@ -70,6 +72,7 @@ class MediaResponse(BaseModel):
     source: MediaSource
     added_by: str | None
     notes: str | None
+    trailer_url: str | None
 
 
 class MediaListResponse(BaseModel):

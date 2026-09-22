@@ -1,3 +1,63 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Light (default) ─────────────────────────────── */
+:root, [data-theme="light"] {
+  --bg-page:            #f9fafb;
+  --bg-surface:         #ffffff;
+  --bg-nav:             #ffffff;
+  --color-primary:      #4f46e5;
+  --color-primary-hover:#4338ca;
+  --color-text:         #111827;
+  --color-muted:        #6b7280;
+  --color-border:       #e5e7eb;
+}
+
+/* ── Dark (Netflix-style) ────────────────────────── */
+[data-theme="dark"] {
+  --bg-page:            #111111;
+  --bg-surface:         #1f1f1f;
+  --bg-nav:             #000000;
+  --color-primary:      #e50914;
+  --color-primary-hover:#b80710;
+  --color-text:         #f3f4f6;
+  --color-muted:        #9ca3af;
+  --color-border:       #2d2d2d;
+}
+
+/* ── Midnight (deep navy) ────────────────────────── */
+[data-theme="midnight"] {
+  --bg-page:            #0f172a;
+  --bg-surface:         #1e293b;
+  --bg-nav:             #0f172a;
+  --color-primary:      #3b82f6;
+  --color-primary-hover:#2563eb;
+  --color-text:         #e2e8f0;
+  --color-muted:        #94a3b8;
+  --color-border:       #334155;
+}
+
+/* ── Warm (amber/cream) ──────────────────────────── */
+[data-theme="warm"] {
+  --bg-page:            #fef9f0;
+  --bg-surface:         #ffffff;
+  --bg-nav:             #fffbf0;
+  --color-primary:      #d97706;
+  --color-primary-hover:#b45309;
+  --color-text:         #1c1917;
+  --color-muted:        #78716c;
+  --color-border:       #e7e5e4;
+}
+
+/* ── Emerald (dark green) ────────────────────────── */
+[data-theme="emerald"] {
+  --bg-page:            #0f2419;
+  --bg-surface:         #1a3a24;
+  --bg-nav:             #0a1a10;
+  --color-primary:      #10b981;
+  --color-primary-hover:#059669;
+  --color-text:         #ecfdf5;
+  --color-muted:        #6ee7b7;
+  --color-border:       #1f4d2e;
+}

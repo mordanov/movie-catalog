@@ -24,9 +24,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 function StatTile({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-1">
-      <p className="text-3xl font-bold text-indigo-600">{value}</p>
-      <p className="text-sm text-gray-500">{label}</p>
+    <div className="bg-surface rounded-xl shadow p-5 flex flex-col gap-1">
+      <p className="text-3xl font-bold text-primary">{value}</p>
+      <p className="text-sm text-muted">{label}</p>
     </div>
   );
 }
@@ -37,14 +37,14 @@ function BarChart({ data, labels }: { data: Record<string, number>; labels: Reco
     <div className="space-y-2">
       {Object.entries(data).map(([key, val]) => (
         <div key={key} className="flex items-center gap-3">
-          <span className="text-sm text-gray-600 w-36 shrink-0">{labels[key] ?? key}</span>
-          <div className="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
+          <span className="text-sm text-muted w-36 shrink-0">{labels[key] ?? key}</span>
+          <div className="flex-1 bg-border-theme rounded-full h-5 overflow-hidden">
             <div
-              className="h-5 bg-indigo-500 rounded-full transition-all"
+              className="h-5 bg-primary rounded-full transition-all"
               style={{ width: `${(val / max) * 100}%` }}
             />
           </div>
-          <span className="text-sm font-medium text-gray-700 w-8 text-right">{val}</span>
+          <span className="text-sm font-medium text-text-base w-8 text-right">{val}</span>
         </div>
       ))}
     </div>
@@ -63,7 +63,7 @@ export default function Stats() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center text-gray-400 py-12">Загрузка...</div>;
+  if (loading) return <div className="text-center text-muted py-12">Загрузка...</div>;
   if (error) return <div className="text-red-600 py-4">{error}</div>;
   if (!stats) return null;
 
@@ -73,7 +73,7 @@ export default function Stats() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900">Статистика</h1>
+      <h1 className="text-2xl font-bold text-text-base">Статистика</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatTile label="Всего" value={stats.total} />
@@ -82,18 +82,18 @@ export default function Stats() {
         <StatTile label="Не смотрели" value={notWatched} />
       </div>
 
-      <div className="bg-white rounded-xl shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">По категориям</h2>
+      <div className="bg-surface rounded-xl shadow p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-text-base">По категориям</h2>
         <BarChart data={stats.by_category} labels={CATEGORY_LABELS} />
       </div>
 
-      <div className="bg-white rounded-xl shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">По типу</h2>
+      <div className="bg-surface rounded-xl shadow p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-text-base">По типу</h2>
         <BarChart data={stats.by_type} labels={TYPE_LABELS} />
       </div>
 
-      <div className="bg-white rounded-xl shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">По статусу просмотра</h2>
+      <div className="bg-surface rounded-xl shadow p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-text-base">По статусу просмотра</h2>
         <BarChart data={stats.by_watched_status} labels={STATUS_LABELS} />
       </div>
     </div>
