@@ -8,14 +8,11 @@ interface Props {
 }
 
 function StarRating({ value }: { value: number }) {
-  // TMDB rating is 0-10; display as 5 stars
   const stars = Math.round((value / 10) * 5);
   return (
     <div className="flex gap-0.5" aria-label={`Рейтинг ${value.toFixed(1)} из 10`}>
       {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={i <= stars ? "text-yellow-400" : "text-border-theme"}>
-          ★
-        </span>
+        <span key={i} className={i <= stars ? "text-yellow-400" : "text-border-theme"}>★</span>
       ))}
       <span className="ml-1 text-sm text-muted">{value.toFixed(1)}</span>
     </div>
@@ -32,23 +29,39 @@ export default function MediaDetailModal({ media, onClose, onEdit }: Props) {
   }, [onClose]);
 
   return (
+    // Mobile: full-screen bg-surface. Desktop (md:): dark backdrop, flex center.
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      className="fixed inset-0 z-50 bg-surface overflow-y-auto md:bg-black/60 md:overflow-hidden md:flex md:items-center md:justify-center md:p-4"
       onClick={onClose}
     >
+      {/* Card: full-height on mobile, max-w-lg rounded on desktop */}
       <div
-        className="bg-surface rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto relative"
+        className="relative w-full min-h-full bg-surface md:min-h-0 md:max-w-lg md:rounded-xl md:shadow-2xl md:max-h-[90vh] md:overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile header: sticky ← back + title */}
+        <div className="sticky top-0 z-10 bg-surface border-b border-border-theme flex items-center px-4 py-3 md:hidden">
+          <button
+            onClick={onClose}
+            className="text-text-base text-xl leading-none mr-3"
+            aria-label="Назад"
+          >
+            ←
+          </button>
+          <h2 className="font-semibold text-text-base truncate flex-1">{title}</h2>
+        </div>
+
+        {/* Desktop ✕ button */}
         <button
           onClick={onClose}
           aria-label="Закрыть"
-          className="absolute top-3 right-3 text-muted hover:text-text-base text-xl leading-none z-10"
+          className="hidden md:block absolute top-3 right-3 text-muted hover:text-text-base text-xl leading-none z-10"
         >
           ✕
         </button>
+
+        {/* Poster + info */}
         <div className="flex gap-4 p-4">
-          {/* Poster */}
           {media.poster_url ? (
             <img
               src={media.poster_url}
@@ -61,9 +74,9 @@ export default function MediaDetailModal({ media, onClose, onEdit }: Props) {
             </div>
           )}
 
-          {/* Info */}
           <div className="flex-1 min-w-0">
-            <h2 className="font-bold text-text-base text-lg leading-tight">{title}</h2>
+            {/* Title shown in header on mobile; show here on desktop */}
+            <h2 className="hidden md:block font-bold text-text-base text-lg leading-tight">{title}</h2>
             {media.title_ru && media.title !== media.title_ru && (
               <p className="text-sm text-muted">{media.title}</p>
             )}
@@ -124,9 +137,10 @@ export default function MediaDetailModal({ media, onClose, onEdit }: Props) {
           >
             Редактировать
           </button>
+          {/* Desktop-only close button in actions row */}
           <button
             onClick={onClose}
-            className="ml-auto px-3 py-1.5 text-muted text-sm hover:text-text-base"
+            className="hidden md:block ml-auto px-3 py-1.5 text-muted text-sm hover:text-text-base"
           >
             Закрыть
           </button>

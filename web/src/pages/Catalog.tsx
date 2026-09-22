@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import type { Media } from "../types";
+import type { CatalogOutletContext } from "./Layout";
 import { api } from "../api";
 import MediaCard from "../components/MediaCard";
 import FilterBar from "../components/FilterBar";
 import Pagination from "../components/Pagination";
-import AddMediaModal from "../components/AddMediaModal";
 import EditMediaModal from "../components/EditMediaModal";
 import MediaDetailModal from "../components/MediaDetailModal";
 
@@ -23,13 +24,13 @@ const DEFAULT_FILTERS: Filters = {
 const PAGE_SIZE = 24;
 
 export default function Catalog() {
+  const { addedCount, onAdd } = useOutletContext<CatalogOutletContext>();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<Media[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<Media | null>(null);
   const [detailTarget, setDetailTarget] = useState<Media | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
@@ -55,7 +56,7 @@ export default function Catalog() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => load(filters, page), filters.search ? 400 : 0);
-  }, [filters, page, load]);
+  }, [filters, page, load, addedCount]);
 
   function handleFilterChange(newFilters: Filters) {
     setFilters(newFilters);
@@ -84,9 +85,10 @@ export default function Catalog() {
           viewMode={viewMode}
           onViewToggle={handleViewToggle}
         />
+        {/* Desktop-only add button — mobile uses BottomNav */}
         <button
-          onClick={() => setShowAdd(true)}
-          className="px-4 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary-hover"
+          onClick={onAdd}
+          className="hidden md:block px-4 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary-hover"
         >
           + Добавить
         </button>
@@ -130,9 +132,6 @@ export default function Catalog() {
 
       <Pagination page={page} total={total} pageSize={PAGE_SIZE} onChange={setPage} />
 
-      {showAdd && (
-        <AddMediaModal onClose={() => setShowAdd(false)} onAdded={() => load(filters, page)} />
-      )}
       {editTarget && (
         <EditMediaModal
           media={editTarget}
