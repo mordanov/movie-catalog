@@ -24,7 +24,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-page">
+    <div className="min-h-screen flex items-center justify-center bg-page px-4">
       <div className="max-w-sm w-full space-y-6 p-8 bg-surface rounded-xl shadow">
         <h1 className="text-2xl font-bold text-center text-text-base">Каталог фильмов</h1>
         {error && (
