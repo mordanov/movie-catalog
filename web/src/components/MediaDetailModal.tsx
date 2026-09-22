@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { Media } from "../types";
 
 interface Props {
@@ -24,15 +25,28 @@ function StarRating({ value }: { value: number }) {
 export default function MediaDetailModal({ media, onClose, onEdit }: Props) {
   const title = media.title_ru || media.title;
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
       onClick={onClose}
     >
       <div
-        className="bg-surface rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+        className="bg-surface rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto relative"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          onClick={onClose}
+          aria-label="Закрыть"
+          className="absolute top-3 right-3 text-muted hover:text-text-base text-xl leading-none z-10"
+        >
+          ✕
+        </button>
         <div className="flex gap-4 p-4">
           {/* Poster */}
           {media.poster_url ? (

@@ -91,10 +91,21 @@ export default function MediaCard({ media, onDetail, onEdit, onStatusToggle, vie
             {status.emoji} {status.label}
           </button>
         </div>
+        {media.trailer_url && (
+          <a
+            href={media.trailer_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1 text-xs text-primary hover:text-primary-hover"
+          >
+            ▶ Трейлер
+          </a>
+        )}
         {onEdit && (
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(media); }}
-            className="mt-2 text-xs text-primary hover:text-primary-hover text-left"
+            className="mt-1 text-xs text-primary hover:text-primary-hover text-left"
           >
             Редактировать
           </button>
