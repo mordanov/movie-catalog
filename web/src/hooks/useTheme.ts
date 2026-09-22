@@ -22,7 +22,7 @@ export function useTheme() {
   // Apply on mount (handles SSR/initial paint)
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return { theme, setTheme: setThemeState, themes: THEMES };
 }

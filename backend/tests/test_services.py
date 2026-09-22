@@ -91,8 +91,11 @@ async def test_tmdb_get_details_returns_trailer_url():
     fake_response.json.return_value = fake_detail
     fake_response.raise_for_status = MagicMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response
+    ):
         from app.services.tmdb import get_details
+
         detail = await get_details(862, "movie", language="en-US")
 
     assert detail["trailer_url"] == "https://www.youtube.com/watch?v=abc123"
@@ -117,8 +120,11 @@ async def test_tmdb_get_details_no_trailer_returns_none():
     fake_response.json.return_value = fake_detail
     fake_response.raise_for_status = MagicMock()
 
-    with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response):
+    with patch(
+        "httpx.AsyncClient.get", new_callable=AsyncMock, return_value=fake_response
+    ):
         from app.services.tmdb import get_details
+
         detail = await get_details(862, "movie")
 
     assert detail["trailer_url"] is None
