@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="clap">
+      <rect x="13" y="14" width="74" height="22" rx="4"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100" height="100" rx="18" fill="#0f172a"/>
+
+  <!-- Board body -->
+  <rect x="13" y="40" width="74" height="46" rx="4" fill="#f1f5f9"/>
+
+  <!-- Text lines on board -->
+  <rect x="20" y="52" width="44" height="4" rx="2" fill="#94a3b8"/>
+  <rect x="20" y="61" width="36" height="4" rx="2" fill="#94a3b8"/>
+  <rect x="20" y="70" width="40" height="4" rx="2" fill="#94a3b8"/>
+
+  <!-- Clapper: white base -->
+  <rect x="13" y="14" width="74" height="22" rx="4" fill="#f1f5f9"/>
+  <!-- Clapper: dark stripes B-W-B-W-B, clipped -->
+  <rect x="13"  y="14" width="15" height="22" fill="#0a0f1e" clip-path="url(#clap)"/>
+  <rect x="42"  y="14" width="16" height="22" fill="#0a0f1e" clip-path="url(#clap)"/>
+  <rect x="71"  y="14" width="16" height="22" fill="#0a0f1e" clip-path="url(#clap)"/>
+
+  <!-- Divider bar -->
+  <rect x="13" y="35" width="74" height="7" fill="#334155"/>
+</svg>
